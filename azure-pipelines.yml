@@ -5,7 +5,7 @@
 
 trigger:
 - master
-- devloper
+- develop
 pool:
   vmImage: ubuntu-latest
 
