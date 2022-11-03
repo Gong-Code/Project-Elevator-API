@@ -5,7 +5,7 @@ namespace ElevatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ElevatorController : ControllerBase
+    public class ElevatorsController : ControllerBase
     {
     }
 }
