@@ -6,7 +6,6 @@ using ElevatorApi.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Xunit.Abstractions;
 using static ElevatorApi.Controllers.CommentsController;
 
 namespace ElevatorApi.Tests.ControllerTests;
@@ -14,11 +13,11 @@ namespace ElevatorApi.Tests.ControllerTests;
 public class CommentsControllerTest
 {
     private readonly SqlDbContext _context;
+    private readonly IFixture _fixture;
+    private readonly CommentsController _sut;
 
     private readonly Guid _userGuid = Guid.Parse("4a6547f6-26f7-43e2-91a5-175b20d55240");
     private readonly string _userName = "Test User";
-    private readonly CommentsController _sut;
-    private readonly IFixture _fixture;
 
 
     public CommentsControllerTest()
@@ -42,7 +41,7 @@ public class CommentsControllerTest
     public async void GetAll_with_valid_data_should_return_OkObjectResult()
     {
         var (elevatorId, errandId) = await SetupContextAndReturnIds();
-        
+
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
         Assert.NotNull(result?.Value);
@@ -81,7 +80,7 @@ public class CommentsControllerTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = ((result?.Value as IEnumerable<CommentsController.Comment>)!).ToList();
+        var items = (result?.Value as IEnumerable<Comment>)!.ToList();
 
         Assert.Equal(200, result?.StatusCode);
         Assert.IsAssignableFrom<IEnumerable>(result?.Value);
@@ -98,7 +97,7 @@ public class CommentsControllerTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = ((result?.Value as IEnumerable<CommentsController.Comment>)!).ToList();
+        var items = (result?.Value as IEnumerable<Comment>)!.ToList();
 
         Assert.Equal(200, result?.StatusCode);
         Assert.IsAssignableFrom<IEnumerable>(result?.Value);
@@ -148,12 +147,12 @@ public class CommentsControllerTest
     {
         var (elevatorId, errandId) = await SetupContextAndReturnIds();
 
-        var comment = new CreateComment()
+        var comment = new CreateComment
         {
             Message = _fixture.Create<string>()
         };
 
-        var result = await _sut.CreateCommentForErrand(elevatorId,errandId, comment) as CreatedAtActionResult;
+        var result = await _sut.CreateCommentForErrand(elevatorId, errandId, comment) as CreatedAtActionResult;
 
         var item = result?.Value as Comment;
 
@@ -170,7 +169,7 @@ public class CommentsControllerTest
     [Fact]
     public async void CreateComment_invalid_data_should_return_BadRequestObjectResult()
     {
-        var comment = new CreateComment()
+        var comment = new CreateComment
         {
             Message = _fixture.Create<string>()
         };
@@ -188,9 +187,9 @@ public class CommentsControllerTest
     [Fact]
     public async void CreateComment_invalid_long_message_lenght_should_return_BadRequestObjectResult()
     {
-        var comment = new CreateComment()
+        var comment = new CreateComment
         {
-            Message = string.Join(" ",_fixture.CreateMany<string>(20))
+            Message = string.Join(" ", _fixture.CreateMany<string>(20))
         };
 
         var result = await _sut.CreateCommentForErrand(Guid.Empty, Guid.Empty, comment) as BadRequestObjectResult;
@@ -206,7 +205,7 @@ public class CommentsControllerTest
     [Fact]
     public async void CreateComment_invalid_short_message_lenght_should_return_BadRequestObjectResult()
     {
-        var comment = new CreateComment()
+        var comment = new CreateComment
         {
             Message = ""
         };
@@ -220,6 +219,7 @@ public class CommentsControllerTest
         Assert.IsType<BadRequestObjectResult>(result);
         Assert.IsNotType<CommentEntity>(item);
     }
+
     private async Task<(Guid elevatorId, Guid errandId)> SetupContextAndReturnIds()
     {
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
@@ -235,10 +235,8 @@ public class CommentsControllerTest
             .CreateMany(5).ToList();
 
         foreach (var elevatorErrand in elevator.Errands)
-        {
             elevatorErrand.Comments = _fixture.Build<CommentEntity>().With(x => x.ErrandEntity, elevatorErrand)
                 .CreateMany(10).ToList();
-        }
 
 
         await _context.AddAsync(elevator);
