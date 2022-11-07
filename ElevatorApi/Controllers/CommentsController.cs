@@ -21,7 +21,7 @@ public class CommentsController : ControllerBase
     [HttpGet("{commentId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Comment>> GetCommentForErrandById(Guid elevatorId, Guid errandId, Guid commentId)
+    public async Task<IActionResult> GetCommentForErrandById(Guid elevatorId, Guid errandId, Guid commentId)
     {
         try
         {
@@ -47,7 +47,7 @@ public class CommentsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<List<Comment>>> GetAllCommentsForErrand(Guid elevatorId, Guid errandId)
+    public async Task<IActionResult> GetAllCommentsForErrand(Guid elevatorId, Guid errandId)
     {
         try
         {
@@ -127,7 +127,7 @@ public class CommentsController : ControllerBase
     public class CreateComment
     {
         [Required]
-        [StringLength(500, MinimumLength = 1, ErrorMessage = "The {0} value must be between {1} and {2} chars long\"")]
+        [StringLength(500, MinimumLength = 1, ErrorMessage = "The {0} value must be between {1} and {2} chars long")]
         public string Message { get; set; } = null!;
     }
 }
