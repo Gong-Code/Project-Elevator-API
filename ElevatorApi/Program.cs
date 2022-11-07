@@ -21,18 +21,24 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-
+app.UseSwagger(s=>
+{
+    s.SerializeAsV2 = true;
+});
 
 if (builder.Environment.IsDevelopment())
-    app.UseSwagger();
+{
+    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+}
 else
+{
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
         options.RoutePrefix = string.Empty;
     });
-
+}
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

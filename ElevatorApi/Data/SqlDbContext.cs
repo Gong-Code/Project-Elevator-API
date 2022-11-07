@@ -17,7 +17,8 @@ namespace ElevatorApi.Data
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            var id = _userService.GetCurrentUser();
+            var id = _userService.GetCurrentUserId();
+            var name = _userService.GetCurrentUserName();
 
             foreach (var entry in ChangeTracker.Entries<EntityBase>())
             {
@@ -36,6 +37,7 @@ namespace ElevatorApi.Data
                     case EntityState.Added:
                         entry.Entity.CreatedDateUtc = DateTime.UtcNow;
                         entry.Entity.CreatedById = id;
+                        entry.Entity.CreatedByName = name;
                         entry.Entity.LastEditedDateUtc = DateTime.UtcNow;
                         entry.Entity.LastEditedById = id;
                         break;
