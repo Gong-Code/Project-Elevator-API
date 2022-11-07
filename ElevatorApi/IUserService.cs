@@ -1,25 +1,43 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿namespace ElevatorApi;
 
-namespace ElevatorApi
+public interface IUserService
 {
-    public interface IUserService
+    public Guid? GetCurrentUserId();
+    public string GetCurrentUserName();
+}
+
+public class TempUserService : IUserService
+{
+    public Guid? GetCurrentUserId()
     {
-        public Guid GetCurrentUserId();
-        public string GetCurrentUserName();
+        return Guid.NewGuid();
     }
 
-    public class UserService : IUserService
+    public string GetCurrentUserName()
     {
-        public Guid GetCurrentUserId()
-        {
-            // TODO fix
-            return Guid.NewGuid();
-        }
+        return "Unknown";
+    }
+}
 
-        public string GetCurrentUserName()
-        {
-            // TODO fix
-            return "Unknown";
-        }
+public class IdentityUserService : IUserService
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public IdentityUserService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public Guid? GetCurrentUserId()
+    {
+        var userIdAsString = _httpContextAccessor.HttpContext?.User
+            .Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+        return Guid.TryParse(userIdAsString, out var result) ? result : null;
+    }
+
+    public string GetCurrentUserName()
+    {
+        return _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "Unknown";
     }
 }

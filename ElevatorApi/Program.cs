@@ -12,7 +12,7 @@ builder.Services.AddDbContext<SqlDbContext>(options =>
     options.UseSqlServer(builder.Configuration["SqlConnectionString"]));
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, TempUserService>();
 
 
 builder.Services.AddControllers();

@@ -17,7 +17,7 @@ namespace ElevatorApi.Data
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            var id = _userService.GetCurrentUserId();
+            var id = _userService.GetCurrentUserId() ?? throw new ArgumentNullException();
             var name = _userService.GetCurrentUserName();
 
             foreach (var entry in ChangeTracker.Entries<EntityBase>())
