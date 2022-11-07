@@ -7,8 +7,8 @@ namespace ElevatorApi.Data
     {
         private readonly IUserService _userService;
 
-        public DbSet<ElevatorEntity> Elevators { get; set; }
-        public DbSet<ErrandEntity> Errands { get; set; }
+        public DbSet<ElevatorEntity> Elevators { get; set; } = null!;
+        public DbSet<ErrandEntity> Errands { get; set; } = null!;
 
         public SqlDbContext(DbContextOptions<SqlDbContext> options, IUserService userService) : base(options)
         {

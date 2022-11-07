@@ -7,8 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["KeyVault"]), new DefaultAzureCredential());
 
-builder.Services.AddDbContext<SqlDbContext>(options => options.UseSqlServer(builder.Configuration["SqlConnectionString"]));
 
+builder.Services.AddDbContext<SqlDbContext>(options =>
+    options.UseSqlServer(builder.Configuration["SqlConnectionString"]));
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, UserService>();
 
 
@@ -20,11 +23,16 @@ var app = builder.Build();
 
 app.UseSwagger();
 
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
-});
+
+if (builder.Environment.IsDevelopment())
+    app.UseSwagger();
+else
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
