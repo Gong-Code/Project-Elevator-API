@@ -1,4 +1,4 @@
-﻿namespace ElevatorApi.Models
+﻿namespace ElevatorApi.Models.Errands
 {
     public class UpdateErrandRequest
     {

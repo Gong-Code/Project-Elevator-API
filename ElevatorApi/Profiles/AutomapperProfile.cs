@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
+using ElevatorApi.Models.Comment;
+using ElevatorApi.Models.Elevator;
+using ElevatorApi.Models.Errands;
 
 namespace ElevatorApi.Profiles
 {
@@ -16,6 +18,13 @@ namespace ElevatorApi.Profiles
             CreateMap<ErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
             CreateMap<ErrandEntity, ErrandDto>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsString(x.ErrandStatus)));
             CreateMap<AddErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
+            CreateMap<UpdateErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
+
+
+
+            CreateMap<CommentDto, CommentEntity>().ForMember(x => x.Id, y => y.MapFrom(x => x.CommentId)).ReverseMap();
+            CreateMap<CreateCommentDto, CommentEntity>();
+
         }
 
 

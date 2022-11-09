@@ -3,7 +3,8 @@
 using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
+using ElevatorApi.Models.Errands;
+using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,11 +15,13 @@ namespace ElevatorApi.Controllers
     public class ErrandsController : ControllerBase
     {
         private readonly SqlDbContext _dbContext;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public ErrandsController(SqlDbContext dbContext, IMapper mapper)
+        public ErrandsController(SqlDbContext dbContext, IUserService userService, IMapper mapper)
         {
             _dbContext = dbContext;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -39,7 +42,7 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpGet("{errandId:guid}")]
-        public async Task<IActionResult> GetErrand([FromRoute] Guid errandId, Guid elevatorId)
+        public async Task<IActionResult> GetErrand(Guid elevatorId, Guid errandId)
         {
             try
             {
@@ -65,6 +68,8 @@ namespace ElevatorApi.Controllers
                 if (elevator is null)
                     return NotFound();
 
+                if (!await _userService.CheckIfUserExists(addErrandRequest.AssignedToId))
+                    return NotFound();
 
                 var errand = _mapper.Map<ErrandEntity>(addErrandRequest);
                 elevator.Errands.Add(errand);
@@ -72,32 +77,36 @@ namespace ElevatorApi.Controllers
 
                 var errandToReturn = _mapper.Map<ErrandDto>(errand);
 
-                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id},
+                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id },
                     errandToReturn);
             }
-            catch 
+            catch
             {
                 return StatusCode(500);
             }
         }
 
-        //[HttpPut]
-        //[Route("{id:guid}")]
-        //public async Task<IActionResult> UpdateErrand([FromRoute] Guid id, UpdateErrandRequest updateErrandRequest)
-        //{
-        //    var errand = await dbContext.Errands.FindAsync(id);
-        //    if (errand != null)
-        //    {
-        //        errand.Title = updateErrandRequest.Title;
-        //        errand.Description = updateErrandRequest.Description;
-        //        errand.ErrandStatus = updateErrandRequest.ErrandStatus;
-        //        errand.AssignedToId = updateErrandRequest.AssignedTo;
-        //        await dbContext.SaveChangesAsync();
+        [HttpPut("{errandId:guid}")]
+        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandRequest updateErrandRequest)
+        {
+            try
+            {
+                var errand = await _dbContext.Errands.Where(x => x.ElevatorEntity.Id == elevatorId)
+                    .FirstOrDefaultAsync(x => x.Id == errandId);
+                if (errand is null)
+                    return NotFound();
 
-        //        return Ok(errand);
+                errand = _mapper.Map<ErrandEntity>(updateErrandRequest);
+                _dbContext.Entry(errand).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
 
-        //    }
-        //    return NotFound();
-        //}
+                return NoContent();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+
+        }
     }
 }

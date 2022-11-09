@@ -1,29 +1,49 @@
 using Azure.Identity;
-using ElevatorApi;
 using ElevatorApi.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ElevatorApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddAzureKeyVault(new Uri(builder.Configuration["KeyVault"]), new DefaultAzureCredential());
 
+builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IUserService, IdentityUserService>();
 
 builder.Services.AddDbContext<SqlDbContext>(options =>
     options.UseSqlServer(builder.Configuration["SqlConnectionString"]));
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserService, TempUserService>();
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseSqlServer(builder.Configuration["IdentityServerSqlConnectionString"]));
 
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddOAuth2Introspection(options =>
+    {
+        options.Authority = "https://project-elevator-idp.azurewebsites.net";
+        options.ClientId = "projectelevatorapi";
+        options.ClientSecret = "2438a004-d396-4e1b-8ff4-30397a02e51d";
+        options.NameClaimType = "given_name";
+        options.RoleClaimType = "role";
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseSwagger(s=>
+app.UseSwagger(s =>
 {
     s.SerializeAsV2 = true;
 });
@@ -43,6 +63,7 @@ else
 }
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

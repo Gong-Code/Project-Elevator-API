@@ -1,4 +1,4 @@
-﻿namespace ElevatorApi.Models
+﻿namespace ElevatorApi.Models.Elevator
 {
     public class ElevatorDto
     {

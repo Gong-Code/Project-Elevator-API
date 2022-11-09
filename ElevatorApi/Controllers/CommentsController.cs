@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Models.Comment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,14 +13,17 @@ namespace ElevatorApi.Controllers;
 public class CommentsController : ControllerBase
 {
     private readonly SqlDbContext _sqlContext;
+    private readonly IMapper _mapper;
 
-    public CommentsController(SqlDbContext sqlContext)
+    public CommentsController(SqlDbContext sqlContext, IMapper mapper)
     {
         _sqlContext = sqlContext;
+        _mapper = mapper;
     }
 
     [HttpGet("{commentId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetCommentForErrandById(Guid elevatorId, Guid errandId, Guid commentId)
     {
@@ -30,22 +34,21 @@ public class CommentsController : ControllerBase
                     .FirstOrDefaultAsync(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId))?.Comments
                 .FirstOrDefault(x => x.Id == commentId);
             if (comment is null)
-                throw new ArgumentNullException();
+                return NotFound();
 
-            var commentToRetun = new Comment(comment);
+            var commentToRetun = _mapper.Map<CommentDto>(comment);
 
             return Ok(commentToRetun);
         }
         catch
         {
-            // ignored
+            return StatusCode(500);
         }
-
-        return BadRequest("could not get comment");
     }
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllCommentsForErrand(Guid elevatorId, Guid errandId)
     {
@@ -55,26 +58,26 @@ public class CommentsController : ControllerBase
                 .FirstOrDefaultAsync(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId);
 
             if (errand is null)
-                throw new ArgumentNullException();
+                return NotFound();
 
-            var comments = errand.Comments.OrderBy(x => x.CreatedDateUtc).Select(comment =>
-                new Comment(comment));
+            var comments = errand.Comments.OrderBy(x => x.CreatedDateUtc).ToList();
 
-            return Ok(comments);
+            var commentsToReturn = _mapper.Map<List<CommentDto>>(comments);
+
+            return Ok(commentsToReturn);
         }
         catch
         {
-            // ignored
+            return StatusCode(500);
         }
-
-        return BadRequest("could not get comments");
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCommentForErrand(Guid elevatorId, Guid errandId,
-        [FromBody] CreateComment model)
+         CreateCommentDto model)
     {
         try
         {
@@ -82,52 +85,19 @@ public class CommentsController : ControllerBase
                 await _sqlContext.Errands.FirstOrDefaultAsync(
                     e => e.ElevatorEntity.Id == elevatorId && e.Id == errandId);
             if (errand is null)
-                throw new ArgumentNullException();
+                return NotFound();
 
-            var comment = new CommentEntity
-            {
-                Message = model.Message
-            };
+            var comment = _mapper.Map<CommentEntity>(model);
 
             errand.Comments.Add(comment);
 
             await _sqlContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCommentForErrandById), new {elevatorId, errandId, commentId = comment.Id},
-                new Comment(comment));
+            return CreatedAtAction(nameof(GetCommentForErrandById), new { elevatorId, errandId, commentId = comment.Id }, _mapper.Map<CommentDto>(comment));
         }
         catch
         {
-            // ignored
+            return StatusCode(500);
         }
-
-        return BadRequest("could not create comment");
-    }
-
-
-    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-    public class Comment
-    {
-        public Comment(CommentEntity entity)
-        {
-            CommentId = entity.Id;
-            CreatedById = entity.CreatedById;
-            CreatedDateUtc = entity.CreatedDateUtc;
-            CreatedByName = entity.CreatedByName;
-            Message = entity.Message;
-        }
-
-        public Guid CommentId { get; init; }
-        public Guid CreatedById { get; init; }
-        public string CreatedByName { get; init; }
-        public DateTime CreatedDateUtc { get; init; }
-        public string Message { get; init; }
-    }
-
-    public class CreateComment
-    {
-        [Required]
-        [StringLength(500, MinimumLength = 1, ErrorMessage = "The {0} value must be between {1} and {2} chars long")]
-        public string Message { get; set; } = null!;
     }
 }

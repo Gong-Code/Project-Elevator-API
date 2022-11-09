@@ -1,8 +1,12 @@
 ﻿using System.Collections;
 using AutoFixture;
+using AutoMapper;
 using ElevatorApi.Controllers;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Models.Comment;
+using ElevatorApi.Profiles;
+using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -10,30 +14,37 @@ using static ElevatorApi.Controllers.CommentsController;
 
 namespace ElevatorApi.Tests.ControllerTests;
 
-public class CommentsControllerTest
+public class CommentsControllerTest : BaseControllerTest
 {
     private readonly SqlDbContext _context;
-    private readonly IFixture _fixture;
+
     private readonly CommentsController _sut;
 
     private readonly Guid _userGuid = Guid.Parse("4a6547f6-26f7-43e2-91a5-175b20d55240");
     private readonly string _userName = "Test User";
 
-
     public CommentsControllerTest()
     {
-        _fixture = new Fixture();
+        
 
         var userService = new Mock<IUserService>();
         userService.Setup(x => x.GetCurrentUserId()).Returns(_userGuid);
-        userService.Setup(x => x.GetCurrentUserName()).Returns(_userName);
+        userService.Setup(x => x.GetCurrentUserName()).Returns(Task.FromResult(_userName));
 
         var contextOptions = new DbContextOptionsBuilder<SqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _context = new SqlDbContext(contextOptions, userService.Object);
 
-        _sut = new CommentsController(_context);
+
+        var config = new MapperConfiguration(c =>
+        {
+            c.AddProfile<AutomapperProfile>();
+        });
+
+        var mapper = config.CreateMapper();
+
+        _sut = new CommentsController(_context, mapper);
     }
 
 
@@ -51,26 +62,25 @@ public class CommentsControllerTest
     }
 
     [Fact]
-    public async void GetAll_with_invalid_data_should_return_BadRequestObjectResult()
+    public async void GetAll_with_invalid_data_should_return_NotFoundResult()
     {
-        var result = await _sut.GetAllCommentsForErrand(Guid.NewGuid(), Guid.NewGuid()) as BadRequestObjectResult;
+        var result = await _sut.GetAllCommentsForErrand(Guid.NewGuid(), Guid.NewGuid()) as NotFoundResult;
 
-        Assert.NotNull(result?.Value);
-        Assert.Equal("could not get comments", result?.Value);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsNotType<CommentEntity>(result.Value);
-        Assert.Equal(400, result.StatusCode);
+  
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Equal(404, result.StatusCode);
+        Assert.IsNotType<CommentEntity>(result);
     }
 
     [Fact]
-    public async void GetAll_with_null_data_should_return_BadRequestObjectResult()
+    public async void GetAll_with_null_data_should_return_NotFoundResult()
     {
-        var result = await _sut.GetAllCommentsForErrand(Guid.Empty, Guid.Empty) as BadRequestObjectResult;
+        var result = await _sut.GetAllCommentsForErrand(Guid.Empty, Guid.Empty) as NotFoundResult;
 
-        Assert.NotNull(result?.Value);
-        Assert.Equal("could not get comments", result?.Value);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal(400, result.StatusCode);
+
+        Assert.IsType<NotFoundResult>(result);
+        Assert.Equal(404, result.StatusCode);
+        Assert.IsNotType<CommentEntity>(result);
     }
 
     [Fact]
@@ -80,7 +90,7 @@ public class CommentsControllerTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = (result?.Value as IEnumerable<Comment>)!.ToList();
+        var items = (result?.Value as IEnumerable<CommentDto>)!.ToList();
 
         Assert.Equal(200, result?.StatusCode);
         Assert.IsAssignableFrom<IEnumerable>(result?.Value);
@@ -97,7 +107,7 @@ public class CommentsControllerTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = (result?.Value as IEnumerable<Comment>)!.ToList();
+        var items = (result?.Value as IEnumerable<CommentDto>)!.ToList();
 
         Assert.Equal(200, result?.StatusCode);
         Assert.IsAssignableFrom<IEnumerable>(result?.Value);
@@ -120,7 +130,7 @@ public class CommentsControllerTest
 
         var result = await _sut.GetCommentForErrandById(elevatorId, errandId, firstComment.Id) as OkObjectResult;
 
-        var item = result?.Value as Comment;
+        var item = result?.Value as CommentDto;
 
         Assert.Equal(200, result?.StatusCode);
         Assert.NotNull(result?.Value);
@@ -129,17 +139,17 @@ public class CommentsControllerTest
         Assert.NotEqual(secondComment.Id, item!.CommentId);
         Assert.IsType<OkObjectResult>(result);
         Assert.IsNotType<CommentEntity>(item);
-        Assert.IsType<Comment>(item);
+        Assert.IsType<CommentDto>(item);
     }
 
     [Fact]
-    public async void GetById_invalid_data_should_return_BadRequestObjectResult()
+    public async void GetById_invalid_data_should_return_NotFoundResult()
     {
-        var result = await _sut.GetCommentForErrandById(Guid.Empty, Guid.Empty, Guid.Empty) as BadRequestObjectResult;
+        var result = await _sut.GetCommentForErrandById(Guid.Empty, Guid.Empty, Guid.Empty) as NotFoundResult;
 
-        Assert.Equal(400, result?.StatusCode);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsNotType<CommentEntity>(result?.Value);
+        Assert.Equal(404, result?.StatusCode);
+        Assert.IsType<NotFoundResult>(result);
+        Assert.IsNotType<CommentEntity>(result);
     }
 
     [Fact]
@@ -147,14 +157,14 @@ public class CommentsControllerTest
     {
         var (elevatorId, errandId) = await SetupContextAndReturnIds();
 
-        var comment = new CreateComment
+        var comment = new CreateCommentDto
         {
-            Message = _fixture.Create<string>()
+            Message = Fixture.Create<string>()
         };
 
         var result = await _sut.CreateCommentForErrand(elevatorId, errandId, comment) as CreatedAtActionResult;
 
-        var item = result?.Value as Comment;
+        var item = result?.Value as CommentDto;
 
         Assert.Equal(201, result?.StatusCode);
         Assert.Equal(comment.Message, item?.Message);
@@ -163,79 +173,42 @@ public class CommentsControllerTest
         Assert.NotNull(result?.Value);
         Assert.IsType<CreatedAtActionResult>(result);
         Assert.IsNotType<CommentEntity>(item);
-        Assert.IsType<Comment>(item);
+        Assert.IsType<CommentDto>(item);
     }
 
     [Fact]
-    public async void CreateComment_invalid_data_should_return_BadRequestObjectResult()
+    public async void CreateComment_invalid_data_should_return_NotFoundResult()
     {
-        var comment = new CreateComment
+        var comment = new CreateCommentDto
         {
-            Message = _fixture.Create<string>()
+            Message = Fixture.Create<string>()
         };
 
-        var result = await _sut.CreateCommentForErrand(Guid.Empty, Guid.Empty, comment) as BadRequestObjectResult;
+        var result = await _sut.CreateCommentForErrand(Guid.Empty, Guid.Empty, comment) as NotFoundResult;
 
-        var item = result?.Value as Comment;
 
-        Assert.Equal(400, result?.StatusCode);
-        Assert.NotNull(result?.Value);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsNotType<CommentEntity>(item);
+        Assert.Equal(404, result?.StatusCode);
+        Assert.IsType<NotFoundResult>(result);
+        Assert.IsNotType<CommentEntity>(result);
     }
 
-    [Fact]
-    public async void CreateComment_invalid_long_message_lenght_should_return_BadRequestObjectResult()
-    {
-        var comment = new CreateComment
-        {
-            Message = string.Join(" ", _fixture.CreateMany<string>(20))
-        };
-
-        var result = await _sut.CreateCommentForErrand(Guid.Empty, Guid.Empty, comment) as BadRequestObjectResult;
-
-        var item = result?.Value as Comment;
-
-        Assert.Equal(400, result?.StatusCode);
-        Assert.NotNull(result?.Value);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsNotType<CommentEntity>(item);
-    }
-
-    [Fact]
-    public async void CreateComment_invalid_short_message_lenght_should_return_BadRequestObjectResult()
-    {
-        var comment = new CreateComment
-        {
-            Message = ""
-        };
-
-        var result = await _sut.CreateCommentForErrand(Guid.Empty, Guid.Empty, comment) as BadRequestObjectResult;
-
-        var item = result?.Value as Comment;
-
-        Assert.Equal(400, result?.StatusCode);
-        Assert.NotNull(result?.Value);
-        Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsNotType<CommentEntity>(item);
-    }
 
     private async Task<(Guid elevatorId, Guid errandId)> SetupContextAndReturnIds()
     {
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        var elevator = _fixture
+        var elevator = Fixture
             .Build<ElevatorEntity>()
             .Without(x => x.Errands)
             .Create();
 
-        elevator.Errands = _fixture
+        elevator.Errands = Fixture
             .Build<ErrandEntity>()
             .With(x => x.ElevatorEntity, elevator)
             .CreateMany(5).ToList();
 
         foreach (var elevatorErrand in elevator.Errands)
-            elevatorErrand.Comments = _fixture.Build<CommentEntity>().With(x => x.ErrandEntity, elevatorErrand)
+            elevatorErrand.Comments = Fixture.Build<CommentEntity>().With(x => x.ErrandEntity, elevatorErrand)
                 .CreateMany(10).ToList();
 
 

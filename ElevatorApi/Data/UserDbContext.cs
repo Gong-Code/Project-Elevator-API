@@ -5,7 +5,7 @@ namespace ElevatorApi.Data
 {
     public class UserDbContext : IdentityDbContext
     {
-        public UserDbContext(DbContextOptions<IdentityDbContext> options) : base(options)
+        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {
             
         }

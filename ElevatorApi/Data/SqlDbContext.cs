@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Data.Entities;
+using ElevatorApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Data
@@ -15,10 +16,10 @@ namespace ElevatorApi.Data
             _userService = userService;
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
             var id = _userService.GetCurrentUserId() ?? throw new ArgumentNullException();
-            var name = _userService.GetCurrentUserName();
+            var name = await _userService.GetCurrentUserName();
 
             foreach (var entry in ChangeTracker.Entries<EntityBase>())
             {
@@ -45,7 +46,7 @@ namespace ElevatorApi.Data
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            return base.SaveChangesAsync(cancellationToken);
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
+using ElevatorApi.Models.Elevator;
+using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,13 @@ public class ElevatorsController : ControllerBase
 {
     private readonly SqlDbContext _context;
     private readonly IMapper _mapper;
+    private readonly IUserService _userService;
 
-    public ElevatorsController(SqlDbContext context, IMapper mapper)
+    public ElevatorsController(SqlDbContext context, IMapper mapper, IUserService userService)
     {
         _context = context;
         _mapper = mapper;
+        _userService = userService;
     }
 
 
