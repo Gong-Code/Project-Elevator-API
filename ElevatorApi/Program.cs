@@ -12,6 +12,7 @@ builder.Services.AddDbContext<SqlDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<IUserService, UserService>();
 
 
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,12 +20,19 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.UseSwagger();
-
-app.UseSwaggerUI(options =>
+if (builder.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
-});
+    app.UseSwaggerUI();
+}
+else
+{
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty;
+    });
+}
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

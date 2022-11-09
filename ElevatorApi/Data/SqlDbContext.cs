@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Data.Entities;
+using ElevatorApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Data
@@ -9,6 +10,7 @@ namespace ElevatorApi.Data
 
         public DbSet<ElevatorEntity> Elevators { get; set; }
         public DbSet<ErrandEntity> Errands { get; set; }
+        public DbSet<Errand> ErrandA { get; set; }
 
         public SqlDbContext(DbContextOptions<SqlDbContext> options, IUserService userService) : base(options)
         {
