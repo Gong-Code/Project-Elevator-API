@@ -8,6 +8,7 @@ public class EntityBase
     public Guid Id { get; set; }
     public DateTime CreatedDateUtc { get; set; }
     public Guid CreatedById { get; set; }
+    public string CreatedByName { get; set; } = null!;
     public DateTime LastEditedDateUtc { get; set; }
     public Guid LastEditedById { get; set; }
     public string? AssignedBy { get; set; }
