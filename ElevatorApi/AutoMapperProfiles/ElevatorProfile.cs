@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Models;
 using static ElevatorApi.Controllers.ElevatorsController;
 
 namespace ElevatorApi.AutoMapperProfiles
@@ -8,7 +9,7 @@ namespace ElevatorApi.AutoMapperProfiles
     {
         public ElevatorProfile()
         {
-            CreateMap<ElevatorEntity, Elevator>().ReverseMap();
+            CreateMap<ElevatorEntity, ElevatorDto>().ReverseMap();
             CreateMap<ElevatorEntity, CreateElevatorDto>().ReverseMap();
         }
     }

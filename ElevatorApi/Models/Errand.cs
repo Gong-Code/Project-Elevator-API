@@ -1,5 +1,4 @@
 ﻿using ElevatorApi.Data.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace ElevatorApi.Models
 {

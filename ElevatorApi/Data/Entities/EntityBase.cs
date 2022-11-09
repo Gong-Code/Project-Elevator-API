@@ -11,9 +11,7 @@ public class EntityBase
     public string CreatedByName { get; set; } = null!;
     public DateTime LastEditedDateUtc { get; set; }
     public Guid LastEditedById { get; set; }
-    public string? AssignedBy { get; set; }
-    public string? AssignedTo { get; set; }
     public DateTime CreatedDate { get; set; }
-    public string? CreatedBy { get; set; }
+    public Guid CreatedBy { get; set; }
 }
 

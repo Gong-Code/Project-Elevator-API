@@ -1,5 +1,4 @@
 ﻿using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Data
