@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Data.Entities;
+using ElevatorApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Data
@@ -7,8 +8,8 @@ namespace ElevatorApi.Data
     {
         private readonly IUserService _userService;
 
-        public DbSet<ElevatorEntity> Elevators { get; set; }
-        public DbSet<ErrandEntity> Errands { get; set; }
+        public DbSet<ElevatorEntity> Elevators { get; set; } = null!;
+        public DbSet<ErrandEntity> Errands { get; set; } = null!;
 
         public SqlDbContext(DbContextOptions<SqlDbContext> options, IUserService userService) : base(options)
         {
@@ -17,7 +18,8 @@ namespace ElevatorApi.Data
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            var id = _userService.GetCurrentUser();
+            var id = _userService.GetCurrentUserId() ?? throw new ArgumentNullException();
+            var name = _userService.GetCurrentUserName();
 
             foreach (var entry in ChangeTracker.Entries<EntityBase>())
             {
@@ -36,6 +38,7 @@ namespace ElevatorApi.Data
                     case EntityState.Added:
                         entry.Entity.CreatedDateUtc = DateTime.UtcNow;
                         entry.Entity.CreatedById = id;
+                        entry.Entity.CreatedByName = name;
                         entry.Entity.LastEditedDateUtc = DateTime.UtcNow;
                         entry.Entity.LastEditedById = id;
                         break;
