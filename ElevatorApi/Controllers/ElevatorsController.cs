@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/elevators")]
 [ApiController]
 public class ElevatorsController : ControllerBase
 {
@@ -19,19 +19,15 @@ public class ElevatorsController : ControllerBase
         _mapper = mapper;
     }
 
-    public class ElevatorListModel
+    public class ElevatorDto
     {
         public Guid Id { get; set; }
         public string Location { get; set; } = null!;
         public string Status { get; set; } = null!;
     }
 
-    public class ElevatorModel
-    {
-        
-    }
 
-    public class CreateElevator
+    public class CreateElevatorDto
     {
         public string Location { get; set; } = null!;
     }
@@ -41,7 +37,7 @@ public class ElevatorsController : ControllerBase
     {
         var elevators = await _context.Elevators.Skip(skip).Take(take).ToListAsync();
 
-        return Ok(_mapper.Map<IEnumerable<ElevatorListModel>>(elevators));
+        return Ok(_mapper.Map<IEnumerable<ElevatorDto>>(elevators));
     }
 
     [HttpGet]
@@ -55,15 +51,15 @@ public class ElevatorsController : ControllerBase
             return NotFound("Elevator not found");
         }
 
-        var result = _mapper.Map<ElevatorListModel>(elevator);
+        var result = _mapper.Map<ElevatorDto>(elevator);
 
         return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateNewElevator(CreateElevator createElevator)
+    public async Task<IActionResult> CreateNewElevator(CreateElevatorDto createElevatorDto)
     {
-        var elevator = _mapper.Map<CreateElevator, ElevatorEntity>(createElevator);
+        var elevator = _mapper.Map<ElevatorEntity>(createElevatorDto);
 
         await _context.AddAsync(elevator);
 
@@ -76,22 +72,26 @@ public class ElevatorsController : ControllerBase
     [Route("{elevatorId}")]
     public async Task<IActionResult> UpdateElevators(Guid elevatorId)
     {
-        if (ModelState.IsValid)
+
+        try
         {
             var elevatorDb = _context.Elevators.FirstOrDefaultAsync(e => e.Id == elevatorId);
-            
+
             if (elevatorDb is null)
             {
                 return NotFound("Elevator not found");
             }
 
-            _mapper.Map<ElevatorListModel>(elevatorDb);
+            _mapper.Map<ElevatorDto>(elevatorDb);
 
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
+        catch
+        {
+            // ignored
+        }
         return BadRequest();
     }
 

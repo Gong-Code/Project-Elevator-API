@@ -9,8 +9,8 @@ namespace ElevatorApi.Profiles
     {
         public AutomapperProfile()
         {
-            CreateMap<ElevatorEntity, ElevatorListModel>().ReverseMap();
-            CreateMap<ElevatorEntity, CreateElevator>().ReverseMap();
+            CreateMap<ElevatorEntity, ElevatorDto>().ReverseMap();
+            CreateMap<ElevatorEntity, CreateElevatorDto>().ReverseMap();
         }
     }
 }

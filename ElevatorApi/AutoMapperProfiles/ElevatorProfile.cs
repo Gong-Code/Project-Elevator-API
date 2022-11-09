@@ -9,7 +9,7 @@ namespace ElevatorApi.AutoMapperProfiles
         public ElevatorProfile()
         {
             CreateMap<ElevatorEntity, Elevator>().ReverseMap();
-            CreateMap<ElevatorEntity, CreateElevator>().ReverseMap();
+            CreateMap<ElevatorEntity, CreateElevatorDto>().ReverseMap();
         }
     }
 }
