@@ -2,7 +2,7 @@
 
 namespace ElevatorApi.Models
 {
-    public class Errand : ErrandEntity
+    public class Errand 
     {
         public Guid Id { get; set; }
         public string? Title { get; set; }

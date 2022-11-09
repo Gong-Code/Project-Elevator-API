@@ -65,7 +65,10 @@ public class ElevatorsController : ControllerBase
             await _context.AddAsync(elevator);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { ElevatorId = elevator.Id }, _mapper.Map<ElevatorDto>(elevator));
+            var elevatorToReturn = _mapper.Map<ElevatorDto>(elevator);
+
+
+            return CreatedAtAction(nameof(GetById), new { ElevatorId = elevator.Id }, elevatorToReturn);
         }
         catch
         {
