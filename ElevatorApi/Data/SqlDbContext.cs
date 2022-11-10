@@ -18,8 +18,7 @@ namespace ElevatorApi.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
         {
-            var id = _userService.GetCurrentUserId() ?? throw new ArgumentNullException();
-            var name = await _userService.GetCurrentUserName();
+            var (userId, userName) = await _userService.GetUserData();
 
             foreach (var entry in ChangeTracker.Entries<EntityBase>())
             {
@@ -33,14 +32,14 @@ namespace ElevatorApi.Data
                         break;
                     case EntityState.Modified:
                         entry.Entity.LastEditedDateUtc = DateTime.UtcNow;
-                        entry.Entity.LastEditedById = id;
+                        entry.Entity.LastEditedById = userId;
                         break;
                     case EntityState.Added:
                         entry.Entity.CreatedDateUtc = DateTime.UtcNow;
-                        entry.Entity.CreatedById = id;
-                        entry.Entity.CreatedByName = name;
+                        entry.Entity.CreatedById = userId;
+                        entry.Entity.CreatedByName = userName;
                         entry.Entity.LastEditedDateUtc = DateTime.UtcNow;
-                        entry.Entity.LastEditedById = id;
+                        entry.Entity.LastEditedById = userId;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

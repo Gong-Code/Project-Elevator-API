@@ -7,6 +7,7 @@
         public string Description { get; set; } = null!;
         public string ErrandStatus { get; set; } = null!;
         public Guid AssignedToId { get; set; }
+        public string AssignedToName { get; set; } = null!;
         public Guid CreatedById { get; set; }
         public string CreatedByName { get; set; } = null!;
         public DateTime CreatedDateUtc { get; set; }

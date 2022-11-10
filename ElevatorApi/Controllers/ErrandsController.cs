@@ -1,8 +1,7 @@
-﻿
-
-using AutoMapper;
+﻿using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +13,13 @@ namespace ElevatorApi.Controllers
     [Route("api/elevators/{elevatorId:guid}/errands")]
     public class ErrandsController : ControllerBase
     {
-        private readonly SqlDbContext _dbContext;
+        private readonly SqlDbContext _context;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public ErrandsController(SqlDbContext dbContext, IUserService userService, IMapper mapper)
+        public ErrandsController(SqlDbContext context, IUserService userService, IMapper mapper)
         {
-            _dbContext = dbContext;
+            _context = context;
             _userService = userService;
             _mapper = mapper;
         }
@@ -30,7 +29,7 @@ namespace ElevatorApi.Controllers
         {
             try
             {
-                var errands = await _dbContext.Errands.Where(x => x.ElevatorEntity.Id == elevatorId).ToListAsync();
+                var errands = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId).ToListAsync();
                 if (errands.Count == 0)
                     return NotFound();
                 return Ok(_mapper.Map<List<ErrandDto>>(errands));
@@ -46,7 +45,7 @@ namespace ElevatorApi.Controllers
         {
             try
             {
-                var errand = await _dbContext.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId)
+                var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId)
                     .FirstOrDefaultAsync();
                 if (errand is null)
                     return NotFound();
@@ -64,7 +63,7 @@ namespace ElevatorApi.Controllers
         {
             try
             {
-                var elevator = await _dbContext.Elevators.FindAsync(elevatorId);
+                var elevator = await _context.Elevators.FindAsync(elevatorId);
                 if (elevator is null)
                     return NotFound();
 
@@ -72,8 +71,10 @@ namespace ElevatorApi.Controllers
                     return NotFound();
 
                 var errand = _mapper.Map<ErrandEntity>(addErrandRequest);
+                errand.AssignedToName = await _userService.GetNameForId(errand.AssignedToId.ToString());
+
                 elevator.Errands.Add(errand);
-                await _dbContext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
                 var errandToReturn = _mapper.Map<ErrandDto>(errand);
 
@@ -87,18 +88,27 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpPut("{errandId:guid}")]
-        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandRequest updateErrandRequest)
+        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandRequest model)
         {
             try
             {
-                var errand = await _dbContext.Errands.Where(x => x.ElevatorEntity.Id == elevatorId)
+                var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId)
                     .FirstOrDefaultAsync(x => x.Id == errandId);
                 if (errand is null)
                     return NotFound();
 
-                errand = _mapper.Map<ErrandEntity>(updateErrandRequest);
-                _dbContext.Entry(errand).State = EntityState.Modified;
-                await _dbContext.SaveChangesAsync();
+                if (!await _userService.CheckIfUserExists(model.AssignedToId.ToString()))
+                    return NotFound();
+
+                _context.Update(errand);
+
+                errand.AssignedToId = model.AssignedToId;
+                errand.AssignedToName = await _userService.GetNameForId(errand.AssignedToId.ToString());
+                errand.Title = model.Title;
+                errand.Description = model.Description;
+                errand.ErrandStatus = model.ErrandStatus.GetErrandStatusAsEnum();
+
+                await _context.SaveChangesAsync();
 
                 return NoContent();
             }
@@ -106,7 +116,6 @@ namespace ElevatorApi.Controllers
             {
                 return StatusCode(500);
             }
-
         }
     }
 }

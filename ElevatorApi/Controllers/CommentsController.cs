@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using AutoMapper;
+﻿using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Models.Comment;

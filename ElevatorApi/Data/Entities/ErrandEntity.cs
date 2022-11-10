@@ -8,5 +8,6 @@ public class ErrandEntity : EntityBase
     public string Description { get; set; } = null!;
     public Enums.ErrandStatus ErrandStatus { get; set; } = Enums.ErrandStatus.New;
     public Guid AssignedToId { get; set; }
+    public string AssignedToName { get; set; } = null!;
     public IList<CommentEntity> Comments { get; set; } = new List<CommentEntity>();
 }

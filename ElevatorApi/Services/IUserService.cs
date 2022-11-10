@@ -6,32 +6,9 @@ namespace ElevatorApi.Services;
 public interface IUserService
 {
     public Guid? GetCurrentUserId();
-    public Task<string> GetCurrentUserName();
+    public Task<string> GetNameForId(string id);
     public Task<(Guid UserId, string UserName)> GetUserData();
     public Task<bool> CheckIfUserExists(string userId);
-}
-
-public class TempUserService : IUserService
-{
-    public Guid? GetCurrentUserId()
-    {
-        return Guid.NewGuid();
-    }
-
-    public Task<string> GetCurrentUserName()
-    {
-        return Task.FromResult("Unknown");
-    }
-
-    public Task<(Guid UserId, string UserName)> GetUserData()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> CheckIfUserExists(string userId)
-    {
-        throw new NotImplementedException();
-    }
 }
 
 public class IdentityUserService : IUserService
@@ -54,14 +31,12 @@ public class IdentityUserService : IUserService
         return Guid.TryParse(userIdAsString, out var result) ? result : Guid.Parse("d51bd4e1-af48-4282-8318-dc912d1feae0");
     }
 
-    public async Task<string> GetCurrentUserName()
+    public async Task<string> GetNameForId(string id)
     {
         var fullName = string.Empty;
         try
         {
-            var userId = GetCurrentUserId();
-
-            var claims = await _context.UserClaims.Where(x => x.UserId == userId.ToString()).ToListAsync();
+            var claims = await _context.UserClaims.Where(x => x.UserId == id).ToListAsync();
             var name = claims.FirstOrDefault(x => x.ClaimType == "given_name")?.ClaimValue ?? "";
             var lastName = claims.FirstOrDefault(x => x.ClaimType == "family_name")?.ClaimValue ?? "";
             fullName = name + " " + lastName;
@@ -80,7 +55,7 @@ public class IdentityUserService : IUserService
 
         try
         {
-            fullName = await GetCurrentUserName();
+            fullName = await GetNameForId(userId.ToString());
         }
         catch
         {

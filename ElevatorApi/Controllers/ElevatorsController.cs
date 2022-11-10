@@ -14,13 +14,11 @@ public class ElevatorsController : ControllerBase
 {
     private readonly SqlDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IUserService _userService;
 
-    public ElevatorsController(SqlDbContext context, IMapper mapper, IUserService userService)
+    public ElevatorsController(SqlDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        _userService = userService;
     }
 
 

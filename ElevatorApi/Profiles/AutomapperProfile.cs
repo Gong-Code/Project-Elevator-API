@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Comment;
 using ElevatorApi.Models.Elevator;
 using ElevatorApi.Models.Errands;
@@ -10,64 +11,21 @@ namespace ElevatorApi.Profiles
     {
         public AutomapperProfile()
         {
-            CreateMap<ElevatorEntity, ElevatorDto>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => GetElevatorStatusAsString(x.ElevatorStatus)));
-            CreateMap<ElevatorDto, ElevatorEntity>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => GetElevatorStatusAsEnum(x.ElevatorStatus)));
+            CreateMap<ElevatorEntity, ElevatorDto>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => x.ElevatorStatus.GetElevatorStatusAsString()));
+            CreateMap<ElevatorDto, ElevatorEntity>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => x.ElevatorStatus.GetElevatorStatusAsEnum()));
             CreateMap<ElevatorEntity, CreateElevatorDto>().ReverseMap();
 
 
-            CreateMap<ErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
-            CreateMap<ErrandEntity, ErrandDto>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsString(x.ErrandStatus)));
-            CreateMap<AddErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
-            CreateMap<UpdateErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => GetErrandStatusAsEnum(x.ErrandStatus)));
+            CreateMap<ErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
+            CreateMap<ErrandEntity, ErrandDto>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsString()));
+            CreateMap<AddErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
+            CreateMap<UpdateErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
 
 
 
             CreateMap<CommentDto, CommentEntity>().ForMember(x => x.Id, y => y.MapFrom(x => x.CommentId)).ReverseMap();
             CreateMap<CreateCommentDto, CommentEntity>();
 
-        }
-
-
-
-        private static Enums.ErrandStatus GetErrandStatusAsEnum(string status)
-        {
-            return status.ToLower() switch
-            {
-                "new" => Enums.ErrandStatus.New,
-                "inprogress" => Enums.ErrandStatus.InProgress,
-                "completed" => Enums.ErrandStatus.Completed,
-                _ => Enums.ErrandStatus.New
-            };
-        }
-        private static string GetErrandStatusAsString(Enums.ErrandStatus status)
-        {
-            return status switch
-            {
-                Enums.ErrandStatus.New => "new",
-                Enums.ErrandStatus.InProgress => "inprogress",
-                Enums.ErrandStatus.Completed => "completed",
-                _ => "new"
-            };
-        }
-        private static string GetElevatorStatusAsString(Enums.ElevatorStatus status)
-        {
-            return status switch
-            {
-                Enums.ElevatorStatus.Enabled => "enabled",
-                Enums.ElevatorStatus.Disabled => "disabled",
-                Enums.ElevatorStatus.Error => "error",
-                _ => "enabled"
-            };
-        }
-        private static Enums.ElevatorStatus GetElevatorStatusAsEnum(string status)
-        {
-            return status.ToLower() switch
-            {
-                "enabled" => Enums.ElevatorStatus.Enabled,
-                "disabled" => Enums.ElevatorStatus.Disabled,
-                "error" => Enums.ElevatorStatus.Error,
-                _ => Enums.ElevatorStatus.Enabled
-            };
         }
     }
 }
