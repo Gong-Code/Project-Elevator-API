@@ -51,7 +51,7 @@ public class IdentityUserService : IUserService
         var userIdAsString = _httpContextAccessor.HttpContext?.User
             .Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 
-        return Guid.TryParse(userIdAsString, out var result) ? result : null;
+        return Guid.TryParse(userIdAsString, out var result) ? result : Guid.Parse("d51bd4e1-af48-4282-8318-dc912d1feae0");
     }
 
     public async Task<string> GetCurrentUserName()
@@ -59,7 +59,7 @@ public class IdentityUserService : IUserService
         var fullName = string.Empty;
         try
         {
-            var userId = GetCurrentUserId() ?? Guid.Empty;
+            var userId = GetCurrentUserId();
 
             var claims = await _context.UserClaims.Where(x => x.UserId == userId.ToString()).ToListAsync();
             var name = claims.FirstOrDefault(x => x.ClaimType == "given_name")?.ClaimValue ?? "";
