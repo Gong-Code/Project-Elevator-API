@@ -30,7 +30,7 @@ public class CommentsControllerTest : BaseControllerTest
         var userService = new Mock<IUserService>();
         userService.Setup(x => x.GetCurrentUserId()).Returns(_userGuid);
         userService.Setup(x => x.GetNameForId(_userGuid.ToString())).Returns(Task.FromResult(_userName));
-
+        userService.Setup(x => x.GetUserData()).Returns(Task.FromResult((_userGuid, _userName)));
         var contextOptions = new DbContextOptionsBuilder<SqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
