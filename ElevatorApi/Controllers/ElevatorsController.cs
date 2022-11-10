@@ -26,7 +26,7 @@ public class ElevatorsController : ControllerBase
             if (!isSuccess)
                 throw new Exception();
 
-            return Ok(new { elevators, paginationMetadata });
+            return Ok(new { Data = elevators, paginationMetadata });
         }
         catch
         {
@@ -45,7 +45,7 @@ public class ElevatorsController : ControllerBase
                 if (elevator is null)
                     return NotFound();
 
-                return Ok(new { elevator, paginationMetadata });
+                return Ok(new { Data = elevator, paginationMetadata });
             }
 
             var singleElevator = await _elevatorRepository.GetById(elevatorId);
