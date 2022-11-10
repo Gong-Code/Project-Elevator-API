@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using ElevatorApi.Data;
-using ElevatorApi.Data.Entities;
-using ElevatorApi.Models.Elevator;
+﻿using ElevatorApi.Models.Elevator;
+using ElevatorApi.Services.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Controllers;
 
@@ -11,23 +8,25 @@ namespace ElevatorApi.Controllers;
 [ApiController]
 public class ElevatorsController : ControllerBase
 {
-    private readonly SqlDbContext _context;
-    private readonly IMapper _mapper;
+    private readonly IElevatorRepository _elevatorRepository;
 
-    public ElevatorsController(SqlDbContext context, IMapper mapper)
+    public ElevatorsController(IElevatorRepository elevatorRepository)
     {
-        _context = context;
-        _mapper = mapper;
+        _elevatorRepository = elevatorRepository;
     }
 
 
     [HttpGet]
-    public async Task<IActionResult> GetElevators(int skip = 0, int take = 20)
+    public async Task<IActionResult> GetElevators(int pageNumber = 1, int pageSize = 10, string? filterOnStatus = "")
     {
         try
         {
-            var elevators = await _context.Elevators.Skip(skip).Take(take).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<ElevatorDto>>(elevators));
+            var (elevators, paginationMetadata, isSuccess) = await _elevatorRepository.GetAll(pageNumber, pageSize, filterOnStatus);
+
+            if (!isSuccess)
+                throw new Exception();
+
+            return Ok(new { elevators, paginationMetadata });
         }
         catch
         {
@@ -36,18 +35,24 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpGet("{elevatorId:guid}")]
-    public async Task<IActionResult> GetById(Guid elevatorId)
+    public async Task<IActionResult> GetById(Guid elevatorId, bool includeErrands, int pageNumber = 1, int pageSize = 10)
     {
         try
         {
-            var elevator = await _context.Elevators.FindAsync(elevatorId);
+            if (includeErrands)
+            {
+                var (elevator, paginationMetadata, isSuccess) = await _elevatorRepository.GetById(elevatorId, pageNumber, pageSize);
+                if (elevator is null)
+                    return NotFound();
 
-            if (elevator is null)
-                return NotFound("Elevator not found");
+                return Ok(new { elevator, paginationMetadata });
+            }
 
-            var result = _mapper.Map<ElevatorDto>(elevator);
+            var singleElevator = await _elevatorRepository.GetById(elevatorId);
+            if (singleElevator is null)
+                return NotFound();
 
-            return Ok(result);
+            return Ok(singleElevator);
         }
         catch
         {
@@ -56,19 +61,15 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateElevator(CreateElevatorDto createElevatorDto)
+    public async Task<IActionResult> CreateElevator(CreateElevatorDto model)
     {
         try
         {
-            var elevator = _mapper.Map<ElevatorEntity>(createElevatorDto);
+            var elevator = await _elevatorRepository.CreateElevator(model);
+            if (elevator is null)
+                throw new Exception();
 
-            await _context.AddAsync(elevator);
-            await _context.SaveChangesAsync();
-
-            var elevatorToReturn = _mapper.Map<ElevatorDto>(elevator);
-
-
-            return CreatedAtAction(nameof(GetById), new { ElevatorId = elevator.Id }, elevatorToReturn);
+            return CreatedAtAction(nameof(GetById), new { ElevatorId = elevator.Id }, elevator);
         }
         catch
         {
@@ -77,18 +78,14 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpPut("{elevatorId:guid}")]
-    public async Task<IActionResult> UpdateElevators(Guid elevatorId)
+    public async Task<IActionResult> UpdateElevator(Guid elevatorId, UpdateElevatorDto model)
     {
         try
         {
-            var elevator = await _context.Elevators.FirstOrDefaultAsync(e => e.Id == elevatorId);
+            var result = await _elevatorRepository.UpdateElevator(elevatorId, model);
 
-            if (elevator is null)
+            if (!result)
                 return NotFound();
-
-            _mapper.Map<ElevatorDto>(elevator);
-
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -97,6 +94,5 @@ public class ElevatorsController : ControllerBase
             return StatusCode(500);
         }
     }
-
 }
 

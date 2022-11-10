@@ -34,7 +34,7 @@ namespace ElevatorApi.Helpers.Extensions
                 _ => "enabled"
             };
         }
-        public static Enums.ElevatorStatus GetElevatorStatusAsEnum(this string status)
+        public static Enums.ElevatorStatus GetElevatorStatusAsEnum(this string? status)
         {
             return status.ToLower() switch
             {
