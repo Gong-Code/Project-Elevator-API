@@ -1,4 +1,8 @@
-﻿using ElevatorApi.Models.Elevator;
+﻿using ElevatorApi.Data.Entities;
+using ElevatorApi.Models.Elevator;
+using ElevatorApi.Models.Errands;
+using ElevatorApi.ResourceParameters;
+using ElevatorApi.Services;
 using ElevatorApi.Services.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,19 +13,25 @@ namespace ElevatorApi.Controllers;
 public class ElevatorsController : ControllerBase
 {
     private readonly IElevatorRepository _elevatorRepository;
+    private readonly IPropertyService _propertyService;
 
-    public ElevatorsController(IElevatorRepository elevatorRepository)
+    public ElevatorsController(IElevatorRepository elevatorRepository, IPropertyService propertyService)
     {
         _elevatorRepository = elevatorRepository;
+        _propertyService = propertyService;
     }
 
 
     [HttpGet]
-    public async Task<IActionResult> GetElevators(int pageNumber = 1, int pageSize = 10, string? filterOnStatus = "", string? search = "")
+    public async Task<IActionResult> GetElevators([FromQuery] ElevatorResourceParameters parameters)
     {
         try
         {
-            var (elevators, paginationMetadata, isSuccess) = await _elevatorRepository.GetAll(pageNumber, pageSize, filterOnStatus, search);
+            if (!_propertyService.ValidOrderBy<ElevatorDto, ElevatorEntity>(parameters.OrderBy))
+                return BadRequest("invalid orderBy does not align with properties on elevator");
+
+
+            var (elevators, paginationMetadata, isSuccess) = await _elevatorRepository.GetAll(parameters);
 
             if (!isSuccess)
                 throw new Exception();
@@ -35,13 +45,16 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpGet("{elevatorId:guid}")]
-    public async Task<IActionResult> GetById(Guid elevatorId, bool includeErrands, int pageNumber = 1, int pageSize = 10)
+    public async Task<IActionResult> GetById(Guid elevatorId, [FromQuery] ElevatorWithErrandsResourceParameters parameters)
     {
         try
         {
-            if (includeErrands)
+            if (parameters.IncludeErrands)
             {
-                var (elevator, paginationMetadata, isSuccess) = await _elevatorRepository.GetById(elevatorId, pageNumber, pageSize);
+                if (!_propertyService.ValidOrderBy<ErrandDto, ErrandEntity>(parameters.OrderBy))
+                    return BadRequest("invalid orderBy, does not align with properties on errand");
+
+                var (elevator, paginationMetadata) = await _elevatorRepository.GetById(elevatorId, parameters);
                 if (elevator is null)
                     return NotFound();
 

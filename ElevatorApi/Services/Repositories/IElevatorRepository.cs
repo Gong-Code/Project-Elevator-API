@@ -3,6 +3,7 @@ using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Elevator;
+using ElevatorApi.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Services.Repositories;
@@ -10,12 +11,12 @@ namespace ElevatorApi.Services.Repositories;
 public interface IElevatorRepository
 {
     public Task<(IEnumerable<ElevatorDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAll(
-        int pageNumber, int pageSize, string? filterOnStatus, string? search);
+        ElevatorResourceParameters parameters);
 
     public Task<ElevatorDto?> GetById(Guid elevatorId);
 
-    public Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetById(
-        Guid elevatorId, int pageNumber, int pageSize);
+    public Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)> GetById(
+        Guid elevatorId, ElevatorWithErrandsResourceParameters parameters);
 
     public Task<ElevatorDto?> CreateElevator(CreateElevatorDto model);
     public Task<bool> UpdateElevator(Guid elevatorId, UpdateElevatorDto model);
@@ -34,29 +35,23 @@ public class ElevatorRepository : IElevatorRepository
     }
 
     public async Task<(IEnumerable<ElevatorDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)>
-        GetAll(int pageNumber, int pageSize, string? filterOnStatus, string? search)
+        GetAll(ElevatorResourceParameters parameters)
     {
-        pageSize = pageSize > MaxSize ? MaxSize : pageSize <= 0 ? 1 : pageSize;
-        pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-
         try
         {
             var collection = _context.Elevators.AsQueryable();
 
-            if (!string.IsNullOrEmpty(filterOnStatus))
-                collection = collection.Where(x => x.ElevatorStatus == filterOnStatus.GetElevatorStatusAsEnum());
+            if (!string.IsNullOrEmpty(parameters.Filter))
+                collection = collection.Where(x => x.ElevatorStatus == parameters.Filter.GetElevatorStatusAsEnum());
 
-            if (!string.IsNullOrEmpty(search))
-                collection = collection.Where(x => x.Location.ToLower().Contains(search.ToLower()));
+            if (!string.IsNullOrEmpty(parameters.SearchQuery))
+                collection = collection.Where(x => x.Location.ToLower().Contains(parameters.SearchQuery.ToLower()));
 
             var totalItems = await collection.CountAsync();
-            var paginationMetadata = new PaginationMetadata(pageNumber, pageSize, totalItems);
+            var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
-            var collectionToReturn = _mapper.Map<IEnumerable<ElevatorDto>>(await collection
-                .OrderBy(x => x.CreatedDateUtc)
-                .Skip(pageSize * (pageNumber - 1))
-                .Take(pageSize)
-                .ToListAsync());
+            var collectionToReturn = _mapper.Map<IEnumerable<ElevatorDto>>(
+                await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).ToListAsync());
 
             return (collectionToReturn, paginationMetadata, true);
         }
@@ -82,37 +77,43 @@ public class ElevatorRepository : IElevatorRepository
         return null!;
     }
 
-    public async Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata, bool IsSuccess)>
-        GetById(Guid elevatorId, int pageNumber, int pageSize)
+    public async Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)>
+        GetById(Guid elevatorId,
+            ElevatorWithErrandsResourceParameters parameters)
     {
-        pageSize = pageSize > MaxSize ? MaxSize : pageSize <= 0 ? 1 : pageSize;
-        pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-
         try
         {
-            var elevator = _mapper.Map<ElevatorWithErrandsDto>(await _context.Elevators.Include(x =>
-                    x.Errands
-                        .OrderBy(er => er.CreatedDateUtc)
-                        .Skip(pageSize * (pageNumber - 1))
-                        .Take(pageSize))
-                .FirstOrDefaultAsync(x => x.Id == elevatorId));
+            var collection = _context.Errands.AsQueryable();
+            collection = collection.Where(x => x.ElevatorEntity.Id == elevatorId);
+            if (!string.IsNullOrEmpty(parameters.Filter))
+                collection = collection.Where(e => e.ErrandStatus == parameters.Filter!.GetErrandStatusAsEnum());
+
+            if (!string.IsNullOrEmpty(parameters.SearchQuery))
+                collection = collection.Where(e => e.Title.ToLower().Contains(parameters.SearchQuery!.ToLower()));
+
+            var errands = await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).ToListAsync();
+            var elevator = await _context.Elevators.FindAsync(elevatorId);
 
             if (elevator is null)
                 throw new Exception();
 
+            elevator.Errands = errands;
+
+
             var totalItems = await _context.Elevators.Where(x => x.Id == elevatorId).Select(x => x.Errands.Count)
                 .FirstOrDefaultAsync();
-            var paginationMetadata = new PaginationMetadata(pageNumber, pageSize, totalItems);
+
+            var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
 
-            return (elevator, paginationMetadata, true);
+            return (_mapper.Map<ElevatorWithErrandsDto>(elevator), paginationMetadata);
         }
         catch
         {
             // ignored
         }
 
-        return (null, null, false)!;
+        return (null, null)!;
     }
 
     public async Task<ElevatorDto?> CreateElevator(CreateElevatorDto model)

@@ -20,6 +20,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IUserService, IdentityUserService>();
 builder.Services.AddScoped<IElevatorRepository, ElevatorRepository>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 
 builder.Services.AddDbContext<SqlDbContext>(options =>

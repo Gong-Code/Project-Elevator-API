@@ -7,9 +7,9 @@ using ElevatorApi.Models.Errands;
 
 namespace ElevatorApi.Helpers.Profiles
 {
-    public class AutomapperProfile : Profile
+    public class AutoMapperProfile : Profile
     {
-        public AutomapperProfile()
+        public AutoMapperProfile()
         {
             CreateMap<ElevatorEntity, ElevatorDto>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => x.ElevatorStatus.GetElevatorStatusAsString()));
             CreateMap<ElevatorDto, ElevatorEntity>().ForMember(x => x.ElevatorStatus, y => y.MapFrom(x => x.ElevatorStatus.GetElevatorStatusAsEnum()));

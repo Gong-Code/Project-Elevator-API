@@ -39,7 +39,7 @@ public class CommentsControllerTest : BaseControllerTest
 
         var config = new MapperConfiguration(c =>
         {
-            c.AddProfile<AutomapperProfile>();
+            c.AddProfile<AutoMapperProfile>();
         });
 
         var mapper = config.CreateMapper();

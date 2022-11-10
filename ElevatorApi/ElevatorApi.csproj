@@ -21,6 +21,7 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.5" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.22" />
   </ItemGroup>
 
 </Project>

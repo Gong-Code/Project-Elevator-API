@@ -1,14 +1,17 @@
-﻿namespace ElevatorApi.Services
+﻿using ElevatorApi.ResourceParameters;
+
+namespace ElevatorApi.Services
 {
     public class PaginationMetadata
     {
-        public PaginationMetadata(int currentPage, int pageSize, int totalItemCount)
+        public PaginationMetadata(ResourceParameterBase parameters, int totalItemCount)
         {
             TotalItemCount = totalItemCount;
-            PageSize = pageSize;
-            CurrentPage = currentPage;
-            TotalPageCount = (int) Math.Ceiling(totalItemCount / (double) pageSize);
+            PageSize = parameters.PageSize;
+            CurrentPage = parameters.CurrentPage;
+            TotalPageCount = (int) Math.Ceiling(totalItemCount / (double) parameters.PageSize);
         }
+
 
         public int TotalItemCount { get; set; } 
         public int TotalPageCount { get; set; }
