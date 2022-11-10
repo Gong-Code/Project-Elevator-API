@@ -47,9 +47,7 @@ public class ElevatorRepository : IElevatorRepository
                 collection = collection.Where(x => x.ElevatorStatus == filterOnStatus.GetElevatorStatusAsEnum());
 
             if (!string.IsNullOrEmpty(search))
-                collection = collection.Where(x =>
-                    string.Equals(x.Location, search, StringComparison.CurrentCultureIgnoreCase));
-
+                collection = collection.Where(x => x.Location.ToLower().Contains(search.ToLower()));
 
             var totalItems = await collection.CountAsync();
             var paginationMetadata = new PaginationMetadata(pageNumber, pageSize, totalItems);
