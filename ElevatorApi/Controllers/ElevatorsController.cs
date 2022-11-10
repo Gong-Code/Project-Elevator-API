@@ -17,11 +17,11 @@ public class ElevatorsController : ControllerBase
 
 
     [HttpGet]
-    public async Task<IActionResult> GetElevators(int pageNumber = 1, int pageSize = 10, string? filterOnStatus = "")
+    public async Task<IActionResult> GetElevators(int pageNumber = 1, int pageSize = 10, string? filterOnStatus = "", string? search = "")
     {
         try
         {
-            var (elevators, paginationMetadata, isSuccess) = await _elevatorRepository.GetAll(pageNumber, pageSize, filterOnStatus);
+            var (elevators, paginationMetadata, isSuccess) = await _elevatorRepository.GetAll(pageNumber, pageSize, filterOnStatus, search);
 
             if (!isSuccess)
                 throw new Exception();

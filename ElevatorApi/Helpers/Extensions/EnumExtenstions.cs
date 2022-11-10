@@ -36,7 +36,7 @@ namespace ElevatorApi.Helpers.Extensions
         }
         public static Enums.ElevatorStatus GetElevatorStatusAsEnum(this string? status)
         {
-            return status.ToLower() switch
+            return status?.ToLower() switch
             {
                 "enabled" => Enums.ElevatorStatus.Enabled,
                 "disabled" => Enums.ElevatorStatus.Disabled,
