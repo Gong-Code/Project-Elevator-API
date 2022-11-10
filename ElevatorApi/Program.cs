@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ElevatorApi.Services;
+using ElevatorApi.Services.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IUserService, IdentityUserService>();
+builder.Services.AddScoped<IElevatorRepository, ElevatorRepository>();
+
 
 builder.Services.AddDbContext<SqlDbContext>(options =>
     options.UseSqlServer(builder.Configuration["SqlConnectionString"]));
