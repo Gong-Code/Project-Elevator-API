@@ -49,7 +49,7 @@ namespace ElevatorApi.Controllers
         {
             try
             {
-                var (errands, paginationMetadata, isSuccess) = await _repository.GetErrandsWithoutElevatorId(parameters);
+                var (errands, paginationMetadata, isSuccess) = await _repository.GetErrandsWithoutElevatorIdAsync(parameters);
                 if (!isSuccess)
                     throw new Exception();
 
@@ -72,12 +72,14 @@ namespace ElevatorApi.Controllers
         {
             try
             {
-                var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId)
-                    .FirstOrDefaultAsync();
+                var (errand, isSuccess) = await _repository.GetErrandAsync(elevatorId, errandId);
+                if (!isSuccess)
+                    throw new Exception();
+
                 if (errand is null)
                     return NotFound();
 
-                return Ok(_mapper.Map<ErrandDto>(errand));
+                return Ok(errand);
             }
             catch
             {
