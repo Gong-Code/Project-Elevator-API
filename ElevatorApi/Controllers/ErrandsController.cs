@@ -3,6 +3,7 @@ using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Errands;
+using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,23 @@ namespace ElevatorApi.Controllers
                 return StatusCode(500);
             }
         }
+
+        [HttpGet("~/api/errands")]
+        public async Task<IActionResult> GetErrandsWithoutElevatorId([FromQuery] ErrandsResourceParameters parameters)
+        {
+            try
+            {
+                var errands = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId).ToListAsync();
+                if (errands.Count == 0)
+                    return NotFound();
+                return Ok(_mapper.Map<List<ErrandDto>>(errands));
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
 
         [HttpGet("{errandId:guid}")]
         public async Task<IActionResult> GetErrand(Guid elevatorId, Guid errandId)
