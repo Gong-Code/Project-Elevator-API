@@ -113,9 +113,9 @@ public class ErrandsRepository : IErrandsRepository
 
 
             var comments = _mapper.Map<IList<CommentDto>>(await collection.ApplyOrderBy("createddateutc,asc").ApplyPagination(parameters).ToListAsync());
-            var errand = await _context.Errands.Select(x => new ErrandWithCommentsDto()
+            var errand = await _context.Errands.Where(x => x.Id == errandId).Select(x => new ErrandWithCommentsDto()
             {
-                AssignedToId = x.CreatedById,
+                AssignedToId = x.AssignedToId,
                 AssignedToName = x.AssignedToName,
                 CreatedById = x.CreatedById,
                 CreatedDateUtc = x.CreatedDateUtc,
