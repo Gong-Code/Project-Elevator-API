@@ -74,7 +74,7 @@ namespace ElevatorApi.Controllers
             {
                 if (parameters.IncludeComments)
                 {
-                    var (errand, paginationMetdata, isSuccess) = await _repository.GetErrandByIdAsync(elevatorId, errandId, parameters);
+                    var (errand, paginationMetadata, isSuccess) = await _repository.GetErrandByIdAsync(elevatorId, errandId, parameters);
 
                     if (!isSuccess)
                         throw new Exception();
@@ -82,7 +82,7 @@ namespace ElevatorApi.Controllers
                     if (errand is null)
                         return NotFound();
 
-                    return Ok(new { Data = errand, paginationMetdata });
+                    return Ok(new { Data = errand, paginationMetadata });
                 }
 
                 var (errands, isSuccesss) = await _repository.GetErrandByIdAsync(elevatorId, errandId);
