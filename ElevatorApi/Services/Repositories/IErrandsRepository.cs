@@ -45,7 +45,19 @@ public class ErrandsRepository : IErrandsRepository
             var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
             var collectionToReturn = _mapper.Map<IEnumerable<ErrandDto>>(
-                await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).ToListAsync());
+                await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).Select(x => new ErrandDto()
+                {
+                    Title = x.Title,
+                    Description = x.Description,
+                    ErrandStatus = x.ErrandStatus.GetErrandStatusAsString(),
+                    AssignedToName = x.AssignedToName,
+                    CreatedByName = x.CreatedByName,
+                    AssignedToId = x.AssignedToId,
+                    CreatedById = x.CreatedById,
+                    CreatedDateUtc = x.CreatedDateUtc,
+                    Id = x.Id,
+                    ElevatorId = x.ElevatorEntity.Id,
+                }).ToListAsync());
 
             return (collectionToReturn, paginationMetadata, true);
         }

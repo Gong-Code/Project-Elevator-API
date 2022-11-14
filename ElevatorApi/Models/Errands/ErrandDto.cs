@@ -6,6 +6,7 @@
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string ErrandStatus { get; set; } = null!;
+        public Guid ElevatorId { get; set; }
         public Guid AssignedToId { get; set; }
         public string AssignedToName { get; set; } = null!;
         public Guid CreatedById { get; set; }
