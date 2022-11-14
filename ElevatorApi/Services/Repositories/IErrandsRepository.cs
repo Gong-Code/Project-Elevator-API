@@ -1,6 +1,7 @@
 using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Helpers.Extensions;
+using ElevatorApi.Models.Comment;
 using ElevatorApi.Models.Elevator;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.ResourceParameters;
@@ -12,7 +13,9 @@ namespace ElevatorApi.Services.Repositories;
 public interface IErrandsRepository
 {
     public Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetErrandsWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
-    public Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandAsync(Guid elevatorId, Guid errandId);
+    public Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId);
+    public Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetErrandByIdAsync(
+        Guid elevatorId,Guid errandId, ErrandsWithCommentResourceParameter parameters);
 }
 
 public class ErrandsRepository : IErrandsRepository
@@ -71,23 +74,23 @@ public class ErrandsRepository : IErrandsRepository
         return (Enumerable.Empty<ErrandDto>(), null, false)!;
     }
 
-    public async Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandAsync(Guid elevatorId, Guid errandId)
+    public async Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId)
     {
         try
         {
             var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId).Select(x => new ErrandDto()
-            {
-                Title = x.Title,
-                Description = x.Description,
-                ErrandStatus = x.ErrandStatus.GetErrandStatusAsString(),
-                AssignedToName = x.AssignedToName,
-                CreatedByName = x.CreatedByName,
-                AssignedToId = x.AssignedToId,
-                CreatedById = x.CreatedById,
-                CreatedDateUtc = x.CreatedDateUtc,
-                Id = x.Id,
-                ElevatorId = x.ElevatorEntity.Id,
-            })
+                {
+                    Title = x.Title,
+                    Description = x.Description,
+                    ErrandStatus = x.ErrandStatus.GetErrandStatusAsString(),
+                    AssignedToName = x.AssignedToName,
+                    CreatedByName = x.CreatedByName,
+                    AssignedToId = x.AssignedToId,
+                    CreatedById = x.CreatedById,
+                    CreatedDateUtc = x.CreatedDateUtc,
+                    Id = x.Id,
+                    ElevatorId = x.ElevatorEntity.Id,
+                })
                 .FirstOrDefaultAsync();
 
             return (errand, true);
@@ -99,4 +102,49 @@ public class ErrandsRepository : IErrandsRepository
 
         return (null, false);
     }
+
+    public async Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters)
+    {
+        try
+        {
+            var collection = _context.Comments.AsQueryable();
+            collection = collection.Where(x => x.ErrandEntity.ElevatorEntity.Id == elevatorId && x.ErrandEntity.Id == errandId);
+
+
+            var comments = _mapper.Map<IList<CommentDto>>(await collection.ApplyOrderBy("createddateutc,asc").ApplyPagination(parameters).ToListAsync());
+            var errand = await _context.Errands.Select(x => new ErrandWithCommentsDto()
+            {
+                AssignedToId = x.CreatedById,
+                AssignedToName = x.AssignedToName,
+                CreatedById = x.CreatedById,
+                CreatedDateUtc = x.CreatedDateUtc,
+                CreatedByName = x.CreatedByName,
+                Description = x.Description,
+                ElevatorId = x.ElevatorEntity.Id,
+                ErrandStatus = x.ErrandStatus.ToString(),
+                Id = x.Id,
+                Title = x.Title
+            }).FirstOrDefaultAsync();
+
+            if (errand is null)
+                throw new Exception();
+
+            errand.Comments = comments;
+
+            var totalItems = await _context.Elevators.Where(x => x.Id == elevatorId).Select(x => x.Errands.Count)
+                .FirstOrDefaultAsync();
+
+            var paginationMetadata = new PaginationMetadata(parameters, totalItems);
+
+
+            return (errand, paginationMetadata, true);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return (null, null,false)!;
+    }
+
 }

@@ -68,18 +68,31 @@ namespace ElevatorApi.Controllers
 
 
         [HttpGet("{errandId:guid}")]
-        public async Task<IActionResult> GetErrand(Guid elevatorId, Guid errandId)
+        public async Task<IActionResult> GetErrand(Guid elevatorId, Guid errandId, [FromQuery] ErrandsWithCommentResourceParameter parameters)
         {
             try
             {
-                var (errand, isSuccess) = await _repository.GetErrandAsync(elevatorId, errandId);
-                if (!isSuccess)
+                if (parameters.IncludeComments)
+                {
+                    var (errand, paginationMetdata, isSuccess) = await _repository.GetErrandByIdAsync(elevatorId, errandId, parameters);
+
+                    if (!isSuccess)
+                        throw new Exception();
+
+                    if (errand is null)
+                        return NotFound();
+
+                    return Ok(new { Data = errand, paginationMetdata });
+                }
+
+                var (errands, isSuccesss) = await _repository.GetErrandByIdAsync(elevatorId, errandId);
+                if (!isSuccesss)
                     throw new Exception();
 
-                if (errand is null)
+                if (errands is null)
                     return NotFound();
 
-                return Ok(errand);
+                return Ok(errands);
             }
             catch
             {
