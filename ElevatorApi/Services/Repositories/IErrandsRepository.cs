@@ -1,3 +1,4 @@
+using System.Security.Cryptography.Xml;
 using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Helpers.Extensions;
@@ -131,7 +132,7 @@ public class ErrandsRepository : IErrandsRepository
 
             errand.Comments = comments;
 
-            var totalItems = await _context.Elevators.Where(x => x.Id == elevatorId).Select(x => x.Errands.Count)
+            var totalItems = await _context.Errands.Where(x => x.Id == errandId).Select(x => x.Comments.Count)
                 .FirstOrDefaultAsync();
 
             var paginationMetadata = new PaginationMetadata(parameters, totalItems);
