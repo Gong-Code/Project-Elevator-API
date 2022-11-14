@@ -3,7 +3,9 @@ using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Errands;
+using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
+using ElevatorApi.Services.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,12 +18,14 @@ namespace ElevatorApi.Controllers
         private readonly SqlDbContext _context;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IErrandsRepository _repository;
 
-        public ErrandsController(SqlDbContext context, IUserService userService, IMapper mapper)
+        public ErrandsController(SqlDbContext context, IUserService userService, IMapper mapper, IErrandsRepository repository)
         {
             _context = context;
             _userService = userService;
             _mapper = mapper;
+            _repository = repository;
         }
 
         [HttpGet]
@@ -39,6 +43,29 @@ namespace ElevatorApi.Controllers
                 return StatusCode(500);
             }
         }
+
+        [HttpGet("~/api/errands")]
+        public async Task<IActionResult> GetErrandsWithoutElevatorId([FromQuery] ErrandsResourceParameters parameters)
+        {
+            try
+            {
+                var (errands, paginationMetadata, isSuccess) = await _repository.GetErrandsWithoutElevatorId(parameters);
+                if (!isSuccess)
+                    throw new Exception();
+
+                var errandDtos = errands as ErrandDto[] ?? errands.ToArray();
+
+                if (!errandDtos.Any())
+                    return NotFound();
+
+                return Ok(new { Data = errandDtos, paginationMetadata });
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
 
         [HttpGet("{errandId:guid}")]
         public async Task<IActionResult> GetErrand(Guid elevatorId, Guid errandId)
