@@ -112,7 +112,7 @@ public class ErrandsRepository : IErrandsRepository
             collection = collection.Where(x => x.ErrandEntity.ElevatorEntity.Id == elevatorId && x.ErrandEntity.Id == errandId);
 
 
-            var comments = _mapper.Map<IList<CommentDto>>(await collection.ApplyOrderBy("createddateutc,asc").ApplyPagination(parameters).ToListAsync());
+            var comments = _mapper.Map<IList<CommentDto>>(await collection.ApplyOrderBy("createddateutc,desc").ApplyPagination(parameters).ToListAsync());
             var errand = await _context.Errands.Where(x => x.Id == errandId).Select(x => new ErrandWithCommentsDto()
             {
                 AssignedToId = x.AssignedToId,
