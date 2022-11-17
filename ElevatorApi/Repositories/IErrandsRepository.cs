@@ -10,9 +10,9 @@ namespace ElevatorApi.Repositories;
 
 public interface IErrandsRepository
 {
-    public Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetErrandsWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
-    public Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId);
-    public Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetErrandByIdAsync(
+    public Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
+    public Task<(ErrandDto? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId);
+    public Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(
         Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters);
 }
 
@@ -27,7 +27,7 @@ public class ErrandsRepository : IErrandsRepository
         _mapper = mapper;
     }
 
-    public async Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetErrandsWithoutElevatorIdAsync(ErrandsResourceParameters parameters)
+    public async Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters)
     {
         try
         {
@@ -72,7 +72,7 @@ public class ErrandsRepository : IErrandsRepository
         return (Enumerable.Empty<ErrandDto>(), null, false)!;
     }
 
-    public async Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId)
+    public async Task<(ErrandDto? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId)
     {
         try
         {
@@ -101,7 +101,7 @@ public class ErrandsRepository : IErrandsRepository
         return (null, false);
     }
 
-    public async Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters)
+    public async Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters)
     {
         try
         {

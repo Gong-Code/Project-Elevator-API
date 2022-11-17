@@ -1,7 +1,6 @@
 ﻿using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers;
 using ElevatorApi.Models.Elevator;
-using ElevatorApi.Models.Errands;
 using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;

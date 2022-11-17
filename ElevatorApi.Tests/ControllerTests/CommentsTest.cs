@@ -4,7 +4,6 @@ using ElevatorApi.Data;
 using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Profiles;
 using ElevatorApi.Models.Comment;
-using ElevatorApi.Services;
 
 namespace ElevatorApi.Tests.ControllerTests;
 
@@ -14,19 +13,12 @@ public class CommentsTest : BaseTest
 
     private readonly CommentsController _sut;
 
-    private readonly Guid _userGuid = Guid.Parse("4a6547f6-26f7-43e2-91a5-175b20d55240");
-    private readonly string _userName = "Test User";
-
     public CommentsTest()
     {
-        var userService = new Mock<IUserService>();
-        userService.Setup(x => x.GetCurrentUserId()).Returns(_userGuid);
-        userService.Setup(x => x.GetNameForId(_userGuid.ToString())).Returns(Task.FromResult(_userName));
-        userService.Setup(x => x.GetUserData()).Returns(Task.FromResult((_userGuid, _userName)));
         var contextOptions = new DbContextOptionsBuilder<SqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        _context = new SqlDbContext(contextOptions, userService.Object);
+        _context = new SqlDbContext(contextOptions, UserService.Object);
 
 
         var config = new MapperConfiguration(c =>
@@ -129,7 +121,7 @@ public class CommentsTest : BaseTest
         Assert.NotNull(result?.Value);
         Assert.NotNull(items?.Data);
         Assert.IsAssignableFrom<IEnumerable>(items.Data);
-        Assert.True(items.Data.ToList().TrueForAll(x => x.CreatedById == _userGuid && x.CreatedByName == _userName));
+        Assert.True(items.Data.ToList().TrueForAll(x => x.CreatedById == UserGuid && x.CreatedByName == UserName));
         Assert.Equal(10, items.Data.Count());
         Assert.IsNotType<CommentEntity>(items.Data.First());
         Assert.IsType<OkObjectResult>(result);
@@ -161,8 +153,8 @@ public class CommentsTest : BaseTest
 
         Assert.Equal(201, result?.StatusCode);
         Assert.Equal(comment.Message, item?.Message);
-        Assert.Equal(_userGuid, item!.CreatedById);
-        Assert.Equal(_userName, item.CreatedByName);
+        Assert.Equal(UserGuid, item!.CreatedById);
+        Assert.Equal(UserName, item.CreatedByName);
         Assert.NotNull(result?.Value);
         Assert.IsType<CreatedAtActionResult>(result);
         Assert.IsNotType<CommentEntity>(item);
