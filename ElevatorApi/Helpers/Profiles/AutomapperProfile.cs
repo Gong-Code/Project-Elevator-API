@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using ElevatorApi.Data.Entities;
+﻿using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Comment;
 using ElevatorApi.Models.Elevator;
@@ -20,8 +19,8 @@ namespace ElevatorApi.Helpers.Profiles
 
             CreateMap<ErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
             CreateMap<ErrandEntity, ErrandDto>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsString()));
-            CreateMap<AddErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
-            CreateMap<UpdateErrandRequest, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
+            CreateMap<CreateErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
+            CreateMap<UpdateErrandDto, ErrandEntity>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsEnum()));
             CreateMap<ErrandEntity, ErrandWithCommentsDto>().ForMember(x => x.ErrandStatus, y => y.MapFrom(x => x.ErrandStatus.GetErrandStatusAsString())).ForMember(x => x.ElevatorId, y => y.MapFrom(x => x.ElevatorEntity.Id));
 
 

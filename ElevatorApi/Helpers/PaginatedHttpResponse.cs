@@ -1,6 +1,5 @@
-﻿using ElevatorApi.Services;
-
-namespace ElevatorApi.Models
+﻿// ReSharper disable MemberCanBePrivate.Global
+namespace ElevatorApi.Helpers
 {
     public class PaginatedHttpResponse<T>
     {
@@ -10,8 +9,7 @@ namespace ElevatorApi.Models
             PaginationMetadata = paginationMetadata;
         }
 
-        public T Data { get; set; }
-        public PaginationMetadata PaginationMetadata { get; set; }
-
+        public T Data { get; }
+        public PaginationMetadata PaginationMetadata { get; }
     }
 }

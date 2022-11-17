@@ -1,20 +1,14 @@
 ﻿using System.Collections;
-using AutoFixture;
-using AutoMapper;
 using ElevatorApi.Controllers;
 using ElevatorApi.Data;
-using ElevatorApi.Data.Entities;
+using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Profiles;
 using ElevatorApi.Models.Comment;
 using ElevatorApi.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-
 
 namespace ElevatorApi.Tests.ControllerTests;
 
-public class CommentsControllerTest : BaseControllerTest
+public class CommentsTest : BaseTest
 {
     private readonly SqlDbContext _context;
 
@@ -23,10 +17,8 @@ public class CommentsControllerTest : BaseControllerTest
     private readonly Guid _userGuid = Guid.Parse("4a6547f6-26f7-43e2-91a5-175b20d55240");
     private readonly string _userName = "Test User";
 
-    public CommentsControllerTest()
+    public CommentsTest()
     {
-        
-
         var userService = new Mock<IUserService>();
         userService.Setup(x => x.GetCurrentUserId()).Returns(_userGuid);
         userService.Setup(x => x.GetNameForId(_userGuid.ToString())).Returns(Task.FromResult(_userName));
@@ -66,7 +58,6 @@ public class CommentsControllerTest : BaseControllerTest
     {
         var result = await _sut.GetAllCommentsForErrand(Guid.NewGuid(), Guid.NewGuid()) as NotFoundResult;
 
-  
         Assert.IsType<NotFoundResult>(result);
         Assert.Equal(404, result.StatusCode);
         Assert.IsNotType<CommentEntity>(result);
@@ -76,7 +67,6 @@ public class CommentsControllerTest : BaseControllerTest
     public async void GetAll_with_null_data_should_return_NotFoundResult()
     {
         var result = await _sut.GetAllCommentsForErrand(Guid.Empty, Guid.Empty) as NotFoundResult;
-
 
         Assert.IsType<NotFoundResult>(result);
         Assert.Equal(404, result.StatusCode);
@@ -90,31 +80,14 @@ public class CommentsControllerTest : BaseControllerTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = (result?.Value as IEnumerable<CommentDto>)!.ToList();
+        var items = (result?.Value as HttpResponse<IEnumerable<CommentDto>>);
 
-        Assert.Equal(200, result?.StatusCode);
-        Assert.IsAssignableFrom<IEnumerable>(result?.Value);
-        Assert.Equal(10, items.Count);
         Assert.NotNull(result?.Value);
-        Assert.IsNotType<CommentEntity>(items.First());
-        Assert.IsType<OkObjectResult>(result);
-    }
-
-    [Fact]
-    public async void GetAll_should_return_comments_with_correct_createdby()
-    {
-        var (elevatorId, errandId) = await SetupContextAndReturnIds();
-
-        var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
-
-        var items = (result?.Value as IEnumerable<CommentDto>)!.ToList();
-
-        Assert.Equal(200, result?.StatusCode);
-        Assert.IsAssignableFrom<IEnumerable>(result?.Value);
-        Assert.True(items.TrueForAll(x => x.CreatedById == _userGuid && x.CreatedByName == _userName));
-        Assert.Equal(10, items.Count);
-        Assert.NotNull(result?.Value);
-        Assert.IsNotType<CommentEntity>(items.First());
+        Assert.NotNull(items!.Data);
+        Assert.Equal(200, result.StatusCode);
+        Assert.Equal(10, items.Data.Count());
+        Assert.IsNotType<CommentEntity>(items.Data.First());
+        Assert.IsAssignableFrom<IEnumerable<CommentDto>>(items.Data);
         Assert.IsType<OkObjectResult>(result);
     }
 
@@ -130,16 +103,36 @@ public class CommentsControllerTest : BaseControllerTest
 
         var result = await _sut.GetCommentForErrandById(elevatorId, errandId, firstComment.Id) as OkObjectResult;
 
-        var item = result?.Value as CommentDto;
+        var item = (result?.Value as HttpResponse<CommentDto>);
 
         Assert.Equal(200, result?.StatusCode);
         Assert.NotNull(result?.Value);
-        Assert.Equal(firstComment.Id, item!.CommentId);
-        Assert.Equal(firstComment.CreatedById, item!.CreatedById);
-        Assert.NotEqual(secondComment.Id, item!.CommentId);
+        Assert.NotNull(item!.Data);
+        Assert.Equal(firstComment.Id, item.Data.CommentId);
+        Assert.Equal(firstComment.CreatedById, item.Data.CreatedById);
+        Assert.NotEqual(secondComment.Id, item.Data.CommentId);
         Assert.IsType<OkObjectResult>(result);
         Assert.IsNotType<CommentEntity>(item);
-        Assert.IsType<CommentDto>(item);
+        Assert.IsType<CommentDto>(item.Data);
+    }
+
+    [Fact]
+    public async void GetAll_should_return_comments_with_correct_createdby()
+    {
+        var (elevatorId, errandId) = await SetupContextAndReturnIds();
+
+        var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
+
+        var items = (result?.Value as HttpResponse<IEnumerable<CommentDto>>);
+
+        Assert.Equal(200, result?.StatusCode);
+        Assert.NotNull(result?.Value);
+        Assert.NotNull(items?.Data);
+        Assert.IsAssignableFrom<IEnumerable>(items.Data);
+        Assert.True(items.Data.ToList().TrueForAll(x => x.CreatedById == _userGuid && x.CreatedByName == _userName));
+        Assert.Equal(10, items.Data.Count());
+        Assert.IsNotType<CommentEntity>(items.Data.First());
+        Assert.IsType<OkObjectResult>(result);
     }
 
     [Fact]

@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using ElevatorApi.Data;
+﻿using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
+using ElevatorApi.Helpers;
 using ElevatorApi.Models.Comment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

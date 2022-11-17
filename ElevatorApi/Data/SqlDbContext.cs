@@ -1,6 +1,7 @@
 ﻿using ElevatorApi.Data.Entities;
 using ElevatorApi.Services;
 using Microsoft.EntityFrameworkCore;
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace ElevatorApi.Data
 {

@@ -1,12 +1,12 @@
-﻿using AutoMapper;
-using ElevatorApi.Data;
+﻿using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Elevator;
 using ElevatorApi.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
-namespace ElevatorApi.Services.Repositories;
+namespace ElevatorApi.Repositories;
 
 public interface IElevatorRepository
 {

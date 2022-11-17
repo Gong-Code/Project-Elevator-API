@@ -1,4 +1,6 @@
-﻿namespace ElevatorApi.Models.Comment
+﻿// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+namespace ElevatorApi.Models.Comment
 {
     public class CommentDto
     {

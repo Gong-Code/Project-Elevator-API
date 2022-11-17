@@ -1,13 +1,11 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using AutoMapper;
-using ElevatorApi.Data;
+﻿using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
-using ElevatorApi.Models;
 using ElevatorApi.Models.Errands;
+using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
-using ElevatorApi.Services.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -98,7 +96,7 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddErrand(AddErrandRequest addErrandRequest, Guid elevatorId)
+        public async Task<IActionResult> AddErrand(CreateErrandDto createErrandDto, Guid elevatorId)
         {
             try
             {
@@ -106,10 +104,10 @@ namespace ElevatorApi.Controllers
                 if (elevator is null)
                     return NotFound();
 
-                if (!await _userService.CheckIfUserExists(addErrandRequest.AssignedToId))
+                if (!await _userService.CheckIfUserExists(createErrandDto.AssignedToId))
                     return NotFound();
 
-                var errand = _mapper.Map<ErrandEntity>(addErrandRequest);
+                var errand = _mapper.Map<ErrandEntity>(createErrandDto);
                 errand.AssignedToName = await _userService.GetNameForId(errand.AssignedToId.ToString());
 
                 elevator.Errands.Add(errand);
@@ -127,7 +125,7 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpPut("{errandId:guid}")]
-        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandRequest model)
+        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandDto model)
         {
             try
             {

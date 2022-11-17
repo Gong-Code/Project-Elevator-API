@@ -7,6 +7,6 @@ namespace ElevatorApi.ResourceParameters
 
         [RegularExpression("enabled|disabled|error", ErrorMessage = "Filter must be enabled, disabled, error.")]
         public string? Filter { get; set; }
-        public string OrderBy { get; set; } = "CreatedDateUtc,asc";
+        public string OrderBy { get; } = "CreatedDateUtc,asc";
     }
 }

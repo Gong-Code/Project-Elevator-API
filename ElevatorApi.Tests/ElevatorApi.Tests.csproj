@@ -28,4 +28,8 @@
     <ProjectReference Include="..\ElevatorApi\ElevatorApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>

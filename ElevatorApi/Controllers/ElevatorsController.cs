@@ -1,10 +1,10 @@
 ﻿using ElevatorApi.Data.Entities;
-using ElevatorApi.Models;
+using ElevatorApi.Helpers;
 using ElevatorApi.Models.Elevator;
 using ElevatorApi.Models.Errands;
+using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
-using ElevatorApi.Services.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElevatorApi.Controllers;
@@ -28,7 +28,7 @@ public class ElevatorsController : ControllerBase
     {
         try
         {
-            if (!_propertyService.ValidOrderBy<ElevatorDto, ElevatorEntity>(parameters.OrderBy))
+            if (!_propertyService.ValidOrderBy<ElevatorEntity>(parameters.OrderBy))
                 return BadRequest("invalid orderBy does not align with properties on elevator");
 
 
@@ -52,7 +52,7 @@ public class ElevatorsController : ControllerBase
         {
             if (parameters.IncludeErrands)
             {
-                if (!_propertyService.ValidOrderBy<ErrandDto, ErrandEntity>(parameters.OrderBy))
+                if (!_propertyService.ValidOrderBy< ErrandEntity>(parameters.OrderBy))
                     return BadRequest("invalid orderBy, does not align with properties on errand");
 
                 var (elevator, paginationMetadata) = await _elevatorRepository.GetById(elevatorId, parameters);

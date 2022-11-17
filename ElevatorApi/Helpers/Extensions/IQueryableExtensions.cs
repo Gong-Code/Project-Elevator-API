@@ -14,7 +14,7 @@ namespace ElevatorApi.Helpers.Extensions
            return query.Skip(parameters.PageSize * (parameters.CurrentPage - 1)).Take(parameters.PageSize);
         }
 
-        public static IQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, string orderBy)
+        public static IQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, string? orderBy)
         {
             var splitArr = orderBy.Split(',');
 

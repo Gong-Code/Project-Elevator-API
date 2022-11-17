@@ -1,19 +1,19 @@
-using AutoMapper;
 using ElevatorApi.Data;
+using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Comment;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
-namespace ElevatorApi.Services.Repositories;
+namespace ElevatorApi.Repositories;
 
 public interface IErrandsRepository
 {
     public Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetErrandsWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
     public Task<(ErrandDto? Errand, bool IsSuccess)> GetErrandByIdAsync(Guid elevatorId, Guid errandId);
     public Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetErrandByIdAsync(
-        Guid elevatorId,Guid errandId, ErrandsWithCommentResourceParameter parameters);
+        Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters);
 }
 
 public class ErrandsRepository : IErrandsRepository
@@ -77,18 +77,18 @@ public class ErrandsRepository : IErrandsRepository
         try
         {
             var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId).Select(x => new ErrandDto()
-                {
-                    Title = x.Title,
-                    Description = x.Description,
-                    ErrandStatus = x.ErrandStatus.GetErrandStatusAsString(),
-                    AssignedToName = x.AssignedToName,
-                    CreatedByName = x.CreatedByName,
-                    AssignedToId = x.AssignedToId,
-                    CreatedById = x.CreatedById,
-                    CreatedDateUtc = x.CreatedDateUtc,
-                    Id = x.Id,
-                    ElevatorId = x.ElevatorEntity.Id,
-                })
+            {
+                Title = x.Title,
+                Description = x.Description,
+                ErrandStatus = x.ErrandStatus.GetErrandStatusAsString(),
+                AssignedToName = x.AssignedToName,
+                CreatedByName = x.CreatedByName,
+                AssignedToId = x.AssignedToId,
+                CreatedById = x.CreatedById,
+                CreatedDateUtc = x.CreatedDateUtc,
+                Id = x.Id,
+                ElevatorId = x.ElevatorEntity.Id,
+            })
                 .FirstOrDefaultAsync();
 
             return (errand, true);
@@ -142,7 +142,7 @@ public class ErrandsRepository : IErrandsRepository
             // ignored
         }
 
-        return (null, null,false)!;
+        return (null, null, false);
     }
 
 }
