@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
+using ElevatorApi.Models;
 using ElevatorApi.Models.Comment;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ public class CommentsController : ControllerBase
 
             var commentToRetun = _mapper.Map<CommentDto>(comment);
 
-            return Ok(commentToRetun);
+            return Ok(new HttpResponse<CommentDto>(commentToRetun));
         }
         catch
         {
@@ -61,9 +62,9 @@ public class CommentsController : ControllerBase
 
             var comments = errand.Comments.OrderBy(x => x.CreatedDateUtc).ToList();
 
-            var commentsToReturn = _mapper.Map<List<CommentDto>>(comments);
+            var commentsToReturn = _mapper.Map<IEnumerable<CommentDto>>(comments);
 
-            return Ok(commentsToReturn);
+            return Ok(new HttpResponse<IEnumerable<CommentDto>>(commentsToReturn));
         }
         catch
         {

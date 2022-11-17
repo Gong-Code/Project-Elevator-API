@@ -1,12 +1,9 @@
-using System.Security.Cryptography.Xml;
 using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Helpers.Extensions;
 using ElevatorApi.Models.Comment;
-using ElevatorApi.Models.Elevator;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.ResourceParameters;
-using IdentityModel.Client;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Services.Repositories;

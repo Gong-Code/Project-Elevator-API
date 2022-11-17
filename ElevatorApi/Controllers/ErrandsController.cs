@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+﻿using System.Reflection.Metadata.Ecma335;
+using AutoMapper;
 using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers.Extensions;
+using ElevatorApi.Models;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
@@ -36,7 +38,7 @@ namespace ElevatorApi.Controllers
                 var errands = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId).ToListAsync();
                 if (errands.Count == 0)
                     return NotFound();
-                return Ok(_mapper.Map<List<ErrandDto>>(errands));
+                return Ok(new HttpResponse<IEnumerable<ErrandDto>>(_mapper.Map<IEnumerable<ErrandDto>>(errands)));
             }
             catch
             {
@@ -53,12 +55,7 @@ namespace ElevatorApi.Controllers
                 if (!isSuccess)
                     throw new Exception();
 
-                var errandDtos = errands as ErrandDto[] ?? errands.ToArray();
-
-                if (!errandDtos.Any())
-                    return NotFound();
-
-                return Ok(new { Data = errandDtos, paginationMetadata });
+                return Ok(new PaginatedHttpResponse<IEnumerable<ErrandDto>>(errands, paginationMetadata));
             }
             catch
             {
@@ -82,7 +79,7 @@ namespace ElevatorApi.Controllers
                     if (errand is null)
                         return NotFound();
 
-                    return Ok(new { Data = errand, paginationMetadata });
+                    return Ok(new PaginatedHttpResponse<ErrandWithCommentsDto>(errand, paginationMetadata!));
                 }
 
                 var (errands, isSuccesss) = await _repository.GetErrandByIdAsync(elevatorId, errandId);
@@ -92,7 +89,7 @@ namespace ElevatorApi.Controllers
                 if (errands is null)
                     return NotFound();
 
-                return Ok(errands);
+                return Ok(new HttpResponse<ErrandDto>(errands));
             }
             catch
             {

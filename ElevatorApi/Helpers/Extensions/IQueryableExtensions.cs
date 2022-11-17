@@ -4,7 +4,6 @@
 using System.Reflection;
 using ElevatorApi.ResourceParameters;
 using System.Linq.Dynamic.Core;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ElevatorApi.Helpers.Extensions
 {

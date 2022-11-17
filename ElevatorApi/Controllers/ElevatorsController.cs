@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Data.Entities;
+using ElevatorApi.Models;
 using ElevatorApi.Models.Elevator;
 using ElevatorApi.Models.Errands;
 using ElevatorApi.ResourceParameters;
@@ -36,7 +37,7 @@ public class ElevatorsController : ControllerBase
             if (!isSuccess)
                 throw new Exception();
 
-            return Ok(new { Data = elevators, paginationMetadata });
+            return Ok(new PaginatedHttpResponse<IEnumerable<ElevatorDto>>(elevators, paginationMetadata));
         }
         catch
         {
@@ -58,14 +59,14 @@ public class ElevatorsController : ControllerBase
                 if (elevator is null)
                     return NotFound();
 
-                return Ok(new { Data = elevator, paginationMetadata });
+                return Ok(new PaginatedHttpResponse<ElevatorWithErrandsDto>(elevator, paginationMetadata));
             }
 
             var singleElevator = await _elevatorRepository.GetById(elevatorId);
             if (singleElevator is null)
                 return NotFound();
 
-            return Ok(singleElevator);
+            return Ok(new HttpResponse<ElevatorDto>(singleElevator));
         }
         catch
         {
