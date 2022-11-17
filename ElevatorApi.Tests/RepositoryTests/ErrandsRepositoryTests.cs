@@ -106,7 +106,7 @@ namespace ElevatorApi.Tests.RepositoryTests
         [InlineData(null, 1, null, 10, 10)]
         public async Task GetAllWithoutElevatorIdAsync_with_errandsResourceParameters(int page, int expectedPage, int pageSize, int expectedPagesize, int expectedItems)
         {
-            var (elevatorId, errandId) = await SetupContextAndReturnIds(200,1);
+            _ = await SetupContextAndReturnIds(200,1);
 
             var (errand, paginationMetadata, isSuccess) = await _sut.GetAllWithoutElevatorIdAsync(new ErrandsResourceParameters()
             {
