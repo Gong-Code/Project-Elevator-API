@@ -5,7 +5,7 @@ namespace ElevatorApi.Services;
 public interface IPropertyService
 {
     public bool ValidPropertiesExists<TSource, TDestination>(string? fields);
-    public bool ValidOrderBy<TSource, TDestination>(string orderBy);
+    public bool ValidOrderBy<T>(string orderBy);
 }
 
 public class PropertyService : IPropertyService
@@ -15,15 +15,18 @@ public class PropertyService : IPropertyService
         return TypeHasProperties<TSource>(fields) && TypeHasProperties<TDestination>(fields);
     }
 
-    public bool ValidOrderBy<TSource, TDestination>(string orderBy)
+    public bool ValidOrderBy<T>(string? orderBy)
     {
+        if (orderBy is null)
+            return false;
+
         var orderByArr = orderBy.Split(',');
         if (orderByArr.Length is > 2 or 0)
             return false;
 
         var trimmed = orderByArr[0].Trim();
 
-        return TypeHasProperties<TSource>(trimmed) && TypeHasProperties<TDestination>(trimmed);
+        return TypeHasProperties<T>(trimmed);
     }
 
     private static bool TypeHasProperties<T>(string? fields)
@@ -31,17 +34,6 @@ public class PropertyService : IPropertyService
         if (fields is null) return false;
         var fieldArr = fields.Split(',');
 
-        foreach (var field in fieldArr)
-        {
-            var property = field.Trim();
-
-            var propertyInfo = typeof(T).GetProperty(property, BindingFlags.IgnoreCase | BindingFlags.Public |
-                                                               BindingFlags.Instance);
-
-            if (propertyInfo is null)
-                return false;
-        }
-
-        return true;
+        return fieldArr.Select(field => field.Trim()).Select(property => typeof(T).GetProperty(property, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance)).All(propertyInfo => propertyInfo is not null);
     }
 }

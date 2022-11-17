@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Models.Errands;
+// ReSharper disable CollectionNeverUpdated.Global
 
 namespace ElevatorApi.Models.Elevator
 {

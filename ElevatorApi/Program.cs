@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ElevatorApi.Services;
-using ElevatorApi.Services.Repositories;
+using ElevatorApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
