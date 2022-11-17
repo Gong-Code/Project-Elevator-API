@@ -10,7 +10,6 @@ namespace ElevatorApi.Tests.RepositoryTests
     {
         private readonly ErrandsRepository _sut;
         private readonly SqlDbContext _context;
-        private readonly IMapper _mapper;
 
         public ErrandsRepositoryTests()
         {
@@ -25,9 +24,9 @@ namespace ElevatorApi.Tests.RepositoryTests
                 c.AddProfile<AutoMapperProfile>();
             });
 
-            _mapper = config.CreateMapper();
+            var mapper = config.CreateMapper();
 
-            _sut = new ErrandsRepository(_context, _mapper);
+            _sut = new ErrandsRepository(_context, mapper);
         }
 
 
