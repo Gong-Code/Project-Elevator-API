@@ -7,7 +7,7 @@ namespace ElevatorApi.ResourceParameters
         public bool IncludeErrands { get; set; }
         [RegularExpression("new|inprogress|completed", ErrorMessage = "Filter must be new, inprogress, completed.")]
         public string? Filter { get; set; }
-        public string OrderBy { get; } = "CreatedDateUtc,asc";
+        public string OrderBy { get; set; } = "CreatedDateUtc,asc";
         public string? SearchQuery { get; set; }
 
     }
