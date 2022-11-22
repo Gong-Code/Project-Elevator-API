@@ -24,4 +24,8 @@
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.22" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Users\" />
+  </ItemGroup>
+
 </Project>

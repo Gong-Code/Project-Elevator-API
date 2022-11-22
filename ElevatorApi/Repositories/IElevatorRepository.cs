@@ -14,7 +14,7 @@ public interface IElevatorRepository
         ElevatorResourceParameters parameters);
 
     public Task<ElevatorDto?> GetById(Guid elevatorId);
-
+    public Task<(IEnumerable<ElevatorIdDto>? Elevators, bool IsSuccess)> GetAllElevatorIds();
     public Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)> GetById(
         Guid elevatorId, ElevatorWithErrandsResourceParameters parameters);
 
@@ -75,6 +75,24 @@ public class ElevatorRepository : IElevatorRepository
         }
 
         return null!;
+    }
+
+    public async Task<(IEnumerable<ElevatorIdDto>? Elevators, bool IsSuccess)> GetAllElevatorIds()
+    {
+        try
+        {
+            return (await _context.Elevators.OrderBy(x => x.Location).Select(x => new ElevatorIdDto()
+            {
+                Id = x.Id,
+                Location = x.Location,
+            }).ToListAsync(), true);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return (null, false);
     }
 
     public async Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)>

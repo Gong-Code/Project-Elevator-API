@@ -21,6 +21,24 @@ public class ElevatorsController : ControllerBase
         _propertyService = propertyService;
     }
 
+    [HttpGet]
+    [Route("ids")]
+    public async Task<IActionResult> GetElevatorIds()
+    {
+        try
+        {
+            var (elevators, isSuccess) = await _elevatorRepository.GetAllElevatorIds();
+
+            if (!isSuccess)
+                throw new Exception();
+
+            return Ok(new HttpResponse<IEnumerable<ElevatorIdDto>>(elevators!));
+        }
+        catch
+        {
+            return StatusCode(500);
+        }
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetElevators([FromQuery] ElevatorResourceParameters parameters)
