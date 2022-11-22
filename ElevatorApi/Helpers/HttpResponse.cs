@@ -6,5 +6,6 @@ public class HttpResponse<T>
     {
         Data = data;
     }
+
     public T Data { get; }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ElevatorApi.Services;
 using ElevatorApi.Repositories;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserService, IdentityUserService>();
 builder.Services.AddScoped<IElevatorRepository, ElevatorRepository>();
 builder.Services.AddScoped<IErrandsRepository, ErrandsRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 
@@ -29,9 +31,6 @@ builder.Services.AddDbContext<SqlDbContext>(options =>
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(builder.Configuration["IdentityServerSqlConnectionString"]));
-
-
-
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
