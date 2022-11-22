@@ -115,8 +115,7 @@ namespace ElevatorApi.Controllers
 
                 var errandToReturn = _mapper.Map<ErrandDto>(errand);
 
-                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id },
-                    errandToReturn);
+                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id }, new HttpResponse<ErrandDto>(errandToReturn));
             }
             catch
             {
