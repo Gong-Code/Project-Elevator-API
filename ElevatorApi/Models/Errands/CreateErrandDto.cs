@@ -13,6 +13,6 @@ namespace ElevatorApi.Models.Errands
         [RegularExpression("new|inprogress|completed", ErrorMessage = "Status must be new, inprogress, completed.")]
         public string ErrandStatus { get; } = "new";
         [Required]
-        public string AssignedToId { get; } = null!;
+        public string AssignedToId { get; set; } = null!;
     }
 }
