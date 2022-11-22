@@ -114,6 +114,8 @@ namespace ElevatorApi.Controllers
                 await _context.SaveChangesAsync();
 
                 var errandToReturn = _mapper.Map<ErrandDto>(errand);
+                errandToReturn.ElevatorId = elevator.Id;
+
 
                 return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id }, new HttpResponse<ErrandDto>(errandToReturn));
             }
