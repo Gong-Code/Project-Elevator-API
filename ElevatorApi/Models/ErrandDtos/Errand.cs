@@ -1,6 +1,6 @@
-﻿namespace ElevatorApi.Models.Errands
+﻿namespace ElevatorApi.Models.ErrandDtos
 {
-    public class ErrandDto
+    public class Errand
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;

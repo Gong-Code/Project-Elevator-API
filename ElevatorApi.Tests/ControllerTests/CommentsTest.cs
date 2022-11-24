@@ -3,7 +3,7 @@ using ElevatorApi.Controllers;
 using ElevatorApi.Data;
 using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Profiles;
-using ElevatorApi.Models.Comment;
+using ElevatorApi.Models.CommentDtos;
 
 namespace ElevatorApi.Tests.ControllerTests;
 
@@ -72,14 +72,14 @@ public class CommentsTest : BaseTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = (result?.Value as HttpResponse<IEnumerable<CommentDto>>);
+        var items = (result?.Value as HttpResponse<IEnumerable<Comment>>);
 
         Assert.NotNull(result?.Value);
         Assert.NotNull(items!.Data);
         Assert.Equal(200, result.StatusCode);
         Assert.Equal(10, items.Data.Count());
         Assert.IsNotType<CommentEntity>(items.Data.First());
-        Assert.IsAssignableFrom<IEnumerable<CommentDto>>(items.Data);
+        Assert.IsAssignableFrom<IEnumerable<Comment>>(items.Data);
         Assert.IsType<OkObjectResult>(result);
     }
 
@@ -95,7 +95,7 @@ public class CommentsTest : BaseTest
 
         var result = await _sut.GetCommentForErrandById(elevatorId, errandId, firstComment.Id) as OkObjectResult;
 
-        var item = (result?.Value as HttpResponse<CommentDto>);
+        var item = (result?.Value as HttpResponse<Comment>);
 
         Assert.Equal(200, result?.StatusCode);
         Assert.NotNull(result?.Value);
@@ -105,7 +105,7 @@ public class CommentsTest : BaseTest
         Assert.NotEqual(secondComment.Id, item.Data.CommentId);
         Assert.IsType<OkObjectResult>(result);
         Assert.IsNotType<CommentEntity>(item);
-        Assert.IsType<CommentDto>(item.Data);
+        Assert.IsType<Comment>(item.Data);
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class CommentsTest : BaseTest
 
         var result = await _sut.GetAllCommentsForErrand(elevatorId, errandId) as OkObjectResult;
 
-        var items = (result?.Value as HttpResponse<IEnumerable<CommentDto>>);
+        var items = (result?.Value as HttpResponse<IEnumerable<Comment>>);
 
         Assert.Equal(200, result?.StatusCode);
         Assert.NotNull(result?.Value);
@@ -142,14 +142,14 @@ public class CommentsTest : BaseTest
     {
         var (elevatorId, errandId) = await SetupContextAndReturnIds();
 
-        var comment = new CreateCommentDto
+        var comment = new CreateCommentRequest
         {
             Message = Fixture.Create<string>()
         };
 
         var result = await _sut.CreateCommentForErrand(elevatorId, errandId, comment) as CreatedAtActionResult;
 
-        var item = result?.Value as CommentDto;
+        var item = result?.Value as Comment;
 
         Assert.Equal(201, result?.StatusCode);
         Assert.Equal(comment.Message, item?.Message);
@@ -158,13 +158,13 @@ public class CommentsTest : BaseTest
         Assert.NotNull(result?.Value);
         Assert.IsType<CreatedAtActionResult>(result);
         Assert.IsNotType<CommentEntity>(item);
-        Assert.IsType<CommentDto>(item);
+        Assert.IsType<Comment>(item);
     }
 
     [Fact]
     public async void CreateComment_invalid_data_should_return_NotFoundResult()
     {
-        var comment = new CreateCommentDto
+        var comment = new CreateCommentRequest
         {
             Message = Fixture.Create<string>()
         };

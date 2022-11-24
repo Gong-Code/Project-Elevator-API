@@ -1,15 +1,15 @@
-﻿using ElevatorApi.Models.Comment;
+﻿using ElevatorApi.Models.CommentDtos;
 
-namespace ElevatorApi.Models.Errands
+namespace ElevatorApi.Models.ErrandDtos
 {
-    public class ErrandWithCommentsDto
+    public class ErrandWithComments
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string ErrandStatus { get; set; } = null!;
         public Guid ElevatorId { get; set; }
-        public IList<CommentDto> Comments { get; set; } = new List<CommentDto>();
+        public IList<Comment> Comments { get; set; } = new List<Comment>();
         public Guid AssignedToId { get; set; }
         public string AssignedToName { get; set; } = null!;
         public Guid CreatedById { get; set; }

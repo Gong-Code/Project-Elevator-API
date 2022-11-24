@@ -1,6 +1,6 @@
 ﻿using ElevatorApi.Data;
 using ElevatorApi.Helpers.Profiles;
-using ElevatorApi.Models.Errands;
+using ElevatorApi.Models.ErrandDtos;
 using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 
@@ -40,7 +40,7 @@ namespace ElevatorApi.Tests.RepositoryTests
 
             Assert.True(isSuccess);
             Assert.NotNull(errand);
-            Assert.IsType<ErrandDto>(errand);
+            Assert.IsType<Errand>(errand);
             Assert.IsNotType<ErrandEntity>(errand);
         }
 
@@ -91,7 +91,7 @@ namespace ElevatorApi.Tests.RepositoryTests
             Assert.Equal(expectedItems, errand.Comments.Count);
             Assert.Equal(200, paginationMetadata.TotalItemCount);
             Assert.IsNotType<ErrandEntity>(errand);
-            Assert.IsType<ErrandWithCommentsDto>(errand);
+            Assert.IsType<ErrandWithComments>(errand);
         }
 
 
@@ -119,7 +119,7 @@ namespace ElevatorApi.Tests.RepositoryTests
             Assert.Equal(expectedPage, paginationMetadata.CurrentPage);
             Assert.Equal(expectedItems, errand.Count());
             Assert.Equal(200, paginationMetadata.TotalItemCount);
-            Assert.IsAssignableFrom<IEnumerable<ErrandDto>>(errand);
+            Assert.IsAssignableFrom<IEnumerable<Errand>>(errand);
         }
 
 

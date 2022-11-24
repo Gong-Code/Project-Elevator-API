@@ -1,14 +1,15 @@
-﻿using ElevatorApi.Models.Errands;
+﻿using ElevatorApi.Models.ErrandDtos;
+
 // ReSharper disable CollectionNeverUpdated.Global
 
-namespace ElevatorApi.Models.Elevator
+namespace ElevatorApi.Models.ElevatorDtos
 {
-    public class ElevatorWithErrandsDto
+    public class ElevatorWithErrands
     {
         public Guid Id { get; set; }
         public string Location { get; set; } = null!;
         public string ElevatorStatus { get; set; } = null!;
         public DateTime CreatedDateUtc { get; set; }
-        public IList<ErrandDto> Errands { get; set; } = new List<ErrandDto>();
+        public IList<Errand> Errands { get; set; } = new List<Errand>();
     }
 }

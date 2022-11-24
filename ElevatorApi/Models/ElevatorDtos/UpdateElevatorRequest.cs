@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ElevatorApi.Models.Elevator
+namespace ElevatorApi.Models.ElevatorDtos
 {
-    public class UpdateElevatorDto
+    public class UpdateElevatorRequest
     {
         [Required]
         [RegularExpression("enabled|disabled|error", ErrorMessage = "Status must be enabled, disabled, error.")]

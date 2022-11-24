@@ -1,5 +1,4 @@
 ﻿using ElevatorApi.Helpers;
-using ElevatorApi.Models.Users;
 using ElevatorApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,14 +14,6 @@ namespace ElevatorApi.Controllers
         {
             _userRepository = userRepository;
         }
-
-        //[HttpGet("/ids")]
-        //public async Task<IActionResult> GetAllUserIds(string role)
-        //{
-        //    await _userRepository.GetAllUserIdsAsync(role);
-
-        //    return Ok();
-        //}
 
 
         [HttpGet]
@@ -42,7 +33,6 @@ namespace ElevatorApi.Controllers
             {
                 return StatusCode(500);
             }
-
         }
     }
 }

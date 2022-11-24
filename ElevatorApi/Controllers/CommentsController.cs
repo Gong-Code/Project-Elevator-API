@@ -1,7 +1,7 @@
 ﻿using ElevatorApi.Data;
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers;
-using ElevatorApi.Models.Comment;
+using ElevatorApi.Models.CommentDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,9 +35,9 @@ public class CommentsController : ControllerBase
             if (comment is null)
                 return NotFound();
 
-            var commentToRetun = _mapper.Map<CommentDto>(comment);
+            var commentToRetun = _mapper.Map<Comment>(comment);
 
-            return Ok(new HttpResponse<CommentDto>(commentToRetun));
+            return Ok(new HttpResponse<Comment>(commentToRetun));
         }
         catch
         {
@@ -61,9 +61,9 @@ public class CommentsController : ControllerBase
 
             var comments = errand.Comments.OrderBy(x => x.CreatedDateUtc).ToList();
 
-            var commentsToReturn = _mapper.Map<IEnumerable<CommentDto>>(comments);
+            var commentsToReturn = _mapper.Map<IEnumerable<Comment>>(comments);
 
-            return Ok(new HttpResponse<IEnumerable<CommentDto>>(commentsToReturn));
+            return Ok(new HttpResponse<IEnumerable<Comment>>(commentsToReturn));
         }
         catch
         {
@@ -76,7 +76,7 @@ public class CommentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCommentForErrand(Guid elevatorId, Guid errandId,
-         CreateCommentDto model)
+         CreateCommentRequest model)
     {
         try
         {
@@ -92,7 +92,7 @@ public class CommentsController : ControllerBase
 
             await _sqlContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCommentForErrandById), new { elevatorId, errandId, commentId = comment.Id }, _mapper.Map<CommentDto>(comment));
+            return CreatedAtAction(nameof(GetCommentForErrandById), new { elevatorId, errandId, commentId = comment.Id }, _mapper.Map<Comment>(comment));
         }
         catch
         {

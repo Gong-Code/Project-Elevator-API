@@ -1,5 +1,4 @@
 using ElevatorApi.Data;
-using ElevatorApi.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
