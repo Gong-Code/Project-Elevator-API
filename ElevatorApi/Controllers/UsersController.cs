@@ -1,4 +1,5 @@
 ﻿using ElevatorApi.Helpers;
+using ElevatorApi.Models.UserDtos;
 using ElevatorApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,7 +28,7 @@ namespace ElevatorApi.Controllers
                 if (!isSuccess)
                     throw new Exception();
 
-                return Ok(new HttpResponse<IEnumerable<UserIdDto>>(users ?? new List<UserIdDto>()));
+                return Ok(new HttpResponse<IEnumerable<UserIds>>(users ?? new List<UserIds>()));
             }
             catch
             {

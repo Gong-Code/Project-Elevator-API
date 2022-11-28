@@ -58,9 +58,9 @@ public class DevicesController : ControllerBase
         return elevator;
     }
 
-    private async Task<Microsoft.Azure.Devices.Device?> GetDeviceCreateIfNotExists(string id)
+    private async Task<Device?> GetDeviceCreateIfNotExists(string id)
     {
         return await _registryManager.GetDeviceAsync(id)
-               ?? await _registryManager.AddDeviceAsync(new Microsoft.Azure.Devices.Device(id));
+               ?? await _registryManager.AddDeviceAsync(new Device(id));
     }
 }
