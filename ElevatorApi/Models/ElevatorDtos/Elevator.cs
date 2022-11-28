@@ -1,6 +1,6 @@
-﻿namespace ElevatorApi.Models.Elevator
+﻿namespace ElevatorApi.Models.ElevatorDtos
 {
-    public class ElevatorDto
+    public class Elevator
     {
         public Guid Id { get; set; }
         public string Location { get; set; } = null!;

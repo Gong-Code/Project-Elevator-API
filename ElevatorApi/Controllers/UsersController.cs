@@ -1,5 +1,5 @@
 ﻿using ElevatorApi.Helpers;
-using ElevatorApi.Models.Users;
+using ElevatorApi.Models.UserDtos;
 using ElevatorApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,14 +16,6 @@ namespace ElevatorApi.Controllers
             _userRepository = userRepository;
         }
 
-        //[HttpGet("/ids")]
-        //public async Task<IActionResult> GetAllUserIds(string role)
-        //{
-        //    await _userRepository.GetAllUserIdsAsync(role);
-
-        //    return Ok();
-        //}
-
 
         [HttpGet]
         [Route("ids")]
@@ -36,13 +28,12 @@ namespace ElevatorApi.Controllers
                 if (!isSuccess)
                     throw new Exception();
 
-                return Ok(new HttpResponse<IEnumerable<UserIdDto>>(users ?? new List<UserIdDto>()));
+                return Ok(new HttpResponse<IEnumerable<UserIds>>(users ?? new List<UserIds>()));
             }
             catch
             {
                 return StatusCode(500);
             }
-
         }
     }
 }

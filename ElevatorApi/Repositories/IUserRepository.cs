@@ -1,13 +1,12 @@
 using ElevatorApi.Data;
-using ElevatorApi.Models.Users;
-using Microsoft.AspNetCore.Identity;
+using ElevatorApi.Models.UserDtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace ElevatorApi.Repositories;
 
 public interface IUserRepository
 {
-    public Task<(List<UserIdDto>? Users, bool IsSuccess)> GetAllUserIdsAsync(string role);
+    public Task<(List<UserIds>? Users, bool IsSuccess)> GetAllUserIdsAsync(string role);
 }
 
 public class UserRepository : IUserRepository
@@ -19,7 +18,7 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<(List<UserIdDto>? Users, bool IsSuccess)> GetAllUserIdsAsync(string roleen)
+    public async Task<(List<UserIds>? Users, bool IsSuccess)> GetAllUserIdsAsync(string roleen)
     {
         try
         {
@@ -32,7 +31,7 @@ public class UserRepository : IUserRepository
             var collection = _context.Users
                 .Where(u => _context.UserRoles.Any(r => r.RoleId == roleId && r.UserId == u.Id));
             var users = await (from u in collection
-                               select new UserIdDto()
+                               select new UserIds()
                                {
                                    Id = u.Id,
                                    FirstName = _context.UserClaims.First(x => x.UserId == u.Id && x.ClaimType == "given_name")!

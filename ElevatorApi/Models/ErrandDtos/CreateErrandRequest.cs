@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ElevatorApi.Models.Errands
+namespace ElevatorApi.Models.ErrandDtos
 {
-    public class UpdateErrandDto
+    public class CreateErrandRequest
     {
         [Required]
         [StringLength(100, MinimumLength = 2, ErrorMessage = "The {0} value must be between {1} and {2} chars long")]
@@ -10,10 +10,9 @@ namespace ElevatorApi.Models.Errands
         [Required]
         [StringLength(500, MinimumLength = 2, ErrorMessage = "The {0} value must be between {1} and {2} chars long")]
         public string Description { get; set; } = null!;
-        [Required]
         [RegularExpression("new|inprogress|completed", ErrorMessage = "Status must be new, inprogress, completed.")]
-        public string ErrandStatus { get; set; } = null!;
+        public string ErrandStatus { get; } = "new";
         [Required]
-        public Guid AssignedToId { get; set; }
+        public string AssignedToId { get; set; } = null!;
     }
 }

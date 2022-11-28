@@ -1,6 +1,6 @@
 ﻿using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers;
-using ElevatorApi.Models.Elevator;
+using ElevatorApi.Models.ElevatorDtos;
 using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
@@ -32,7 +32,7 @@ public class ElevatorsController : ControllerBase
             if (!isSuccess)
                 throw new Exception();
 
-            return Ok(new HttpResponse<IEnumerable<ElevatorIdDto>>(elevators!));
+            return Ok(new HttpResponse<IEnumerable<ElevatorIds>>(elevators!));
         }
         catch
         {
@@ -54,7 +54,7 @@ public class ElevatorsController : ControllerBase
             if (!isSuccess)
                 throw new Exception();
 
-            return Ok(new PaginatedHttpResponse<IEnumerable<ElevatorDto>>(elevators, paginationMetadata));
+            return Ok(new PaginatedHttpResponse<IEnumerable<Elevator>>(elevators, paginationMetadata));
         }
         catch
         {
@@ -76,14 +76,14 @@ public class ElevatorsController : ControllerBase
                 if (elevator is null)
                     return NotFound();
 
-                return Ok(new PaginatedHttpResponse<ElevatorWithErrandsDto>(elevator, paginationMetadata));
+                return Ok(new PaginatedHttpResponse<ElevatorWithErrands>(elevator, paginationMetadata));
             }
 
             var singleElevator = await _elevatorRepository.GetById(elevatorId);
             if (singleElevator is null)
                 return NotFound();
 
-            return Ok(new HttpResponse<ElevatorDto>(singleElevator));
+            return Ok(new HttpResponse<Elevator>(singleElevator));
         }
         catch
         {
@@ -92,7 +92,7 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateElevator(CreateElevatorDto model)
+    public async Task<IActionResult> CreateElevator(CreateElevatorRequest model)
     {
         try
         {
@@ -109,7 +109,7 @@ public class ElevatorsController : ControllerBase
     }
 
     [HttpPut("{elevatorId:guid}")]
-    public async Task<IActionResult> UpdateElevator(Guid elevatorId, UpdateElevatorDto model)
+    public async Task<IActionResult> UpdateElevator(Guid elevatorId, UpdateElevatorRequest model)
     {
         try
         {

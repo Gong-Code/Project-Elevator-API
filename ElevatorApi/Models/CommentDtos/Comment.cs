@@ -1,8 +1,8 @@
 ﻿// ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-namespace ElevatorApi.Models.Comment
+namespace ElevatorApi.Models.CommentDtos
 {
-    public class CommentDto
+    public class Comment
     {
         public Guid CommentId { get; init; }
         public Guid CreatedById { get; init; }

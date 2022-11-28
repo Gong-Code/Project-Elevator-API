@@ -2,7 +2,7 @@
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
-using ElevatorApi.Models.Errands;
+using ElevatorApi.Models.ErrandDtos;
 using ElevatorApi.Repositories;
 using ElevatorApi.ResourceParameters;
 using ElevatorApi.Services;
@@ -36,7 +36,7 @@ namespace ElevatorApi.Controllers
                 var errands = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId).ToListAsync();
                 if (errands.Count == 0)
                     return NotFound();
-                return Ok(new HttpResponse<IEnumerable<ErrandDto>>(_mapper.Map<IEnumerable<ErrandDto>>(errands)));
+                return Ok(new HttpResponse<IEnumerable<Errand>>(_mapper.Map<IEnumerable<Errand>>(errands)));
             }
             catch
             {
@@ -53,7 +53,7 @@ namespace ElevatorApi.Controllers
                 if (!isSuccess)
                     throw new Exception();
 
-                return Ok(new PaginatedHttpResponse<IEnumerable<ErrandDto>>(errands, paginationMetadata));
+                return Ok(new PaginatedHttpResponse<IEnumerable<Errand>>(errands, paginationMetadata));
             }
             catch
             {
@@ -77,7 +77,7 @@ namespace ElevatorApi.Controllers
                     if (errand is null)
                         return NotFound();
 
-                    return Ok(new PaginatedHttpResponse<ErrandWithCommentsDto>(errand, paginationMetadata!));
+                    return Ok(new PaginatedHttpResponse<ErrandWithComments>(errand, paginationMetadata!));
                 }
 
                 var (errands, isSuccesss) = await _repository.GetByIdAsync(elevatorId, errandId);
@@ -87,7 +87,7 @@ namespace ElevatorApi.Controllers
                 if (errands is null)
                     return NotFound();
 
-                return Ok(new HttpResponse<ErrandDto>(errands));
+                return Ok(new HttpResponse<Errand>(errands));
             }
             catch
             {
@@ -96,7 +96,7 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddErrand(CreateErrandDto createErrandDto, Guid elevatorId)
+        public async Task<IActionResult> AddErrand(CreateErrandRequest createErrandRequest, Guid elevatorId)
         {
             try
             {
@@ -104,20 +104,20 @@ namespace ElevatorApi.Controllers
                 if (elevator is null)
                     return NotFound();
 
-                if (!await _userService.CheckIfUserExists(createErrandDto.AssignedToId))
+                if (!await _userService.CheckIfUserExists(createErrandRequest.AssignedToId))
                     return NotFound();
 
-                var errand = _mapper.Map<ErrandEntity>(createErrandDto);
+                var errand = _mapper.Map<ErrandEntity>(createErrandRequest);
                 errand.AssignedToName = await _userService.GetNameForId(errand.AssignedToId.ToString());
 
                 elevator.Errands.Add(errand);
                 await _context.SaveChangesAsync();
 
-                var errandToReturn = _mapper.Map<ErrandDto>(errand);
+                var errandToReturn = _mapper.Map<Errand>(errand);
                 errandToReturn.ElevatorId = elevator.Id;
 
 
-                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id }, new HttpResponse<ErrandDto>(errandToReturn));
+                return CreatedAtAction(nameof(GetErrand), new { ElevatorId = elevatorId, ErrandId = errand.Id }, new HttpResponse<Errand>(errandToReturn));
             }
             catch
             {
@@ -126,7 +126,7 @@ namespace ElevatorApi.Controllers
         }
 
         [HttpPut("{errandId:guid}")]
-        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandDto model)
+        public async Task<IActionResult> UpdateErrand(Guid elevatorId, Guid errandId, UpdateErrandRequest model)
         {
             try
             {

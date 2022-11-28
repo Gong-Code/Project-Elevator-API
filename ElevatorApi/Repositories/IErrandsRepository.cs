@@ -1,8 +1,8 @@
 using ElevatorApi.Data;
 using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
-using ElevatorApi.Models.Comment;
-using ElevatorApi.Models.Errands;
+using ElevatorApi.Models.CommentDtos;
+using ElevatorApi.Models.ErrandDtos;
 using ElevatorApi.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +10,9 @@ namespace ElevatorApi.Repositories;
 
 public interface IErrandsRepository
 {
-    public Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
-    public Task<(ErrandDto? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId);
-    public Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(
+    public Task<(IEnumerable<Errand> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters);
+    public Task<(Errand? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId);
+    public Task<(ErrandWithComments? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(
         Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters);
 }
 
@@ -27,7 +27,7 @@ public class ErrandsRepository : IErrandsRepository
         _mapper = mapper;
     }
 
-    public async Task<(IEnumerable<ErrandDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters)
+    public async Task<(IEnumerable<Errand> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAllWithoutElevatorIdAsync(ErrandsResourceParameters parameters)
     {
         try
         {
@@ -47,8 +47,8 @@ public class ErrandsRepository : IErrandsRepository
             var totalItems = await collection.CountAsync();
             var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
-            var collectionToReturn = _mapper.Map<IEnumerable<ErrandDto>>(
-                await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).Select(x => new ErrandDto()
+            var collectionToReturn = _mapper.Map<IEnumerable<Errand>>(
+                await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).Select(x => new Errand()
                 {
                     Title = x.Title,
                     Description = x.Description,
@@ -69,14 +69,14 @@ public class ErrandsRepository : IErrandsRepository
             // ignored
         }
 
-        return (Enumerable.Empty<ErrandDto>(), null, false)!;
+        return (Enumerable.Empty<Errand>(), null, false)!;
     }
 
-    public async Task<(ErrandDto? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId)
+    public async Task<(Errand? Errand, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId)
     {
         try
         {
-            var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId).Select(x => new ErrandDto()
+            var errand = await _context.Errands.Where(x => x.ElevatorEntity.Id == elevatorId && x.Id == errandId).Select(x => new Errand()
             {
                 Title = x.Title,
                 Description = x.Description,
@@ -101,7 +101,7 @@ public class ErrandsRepository : IErrandsRepository
         return (null, false);
     }
 
-    public async Task<(ErrandWithCommentsDto? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters)
+    public async Task<(ErrandWithComments? Errand, PaginationMetadata? PaginationMetadata, bool IsSuccess)> GetByIdAsync(Guid elevatorId, Guid errandId, ErrandsWithCommentResourceParameter parameters)
     {
         try
         {
@@ -109,8 +109,8 @@ public class ErrandsRepository : IErrandsRepository
             collection = collection.Where(x => x.ErrandEntity.ElevatorEntity.Id == elevatorId && x.ErrandEntity.Id == errandId);
 
 
-            var comments = _mapper.Map<IList<CommentDto>>(await collection.ApplyOrderBy("createddateutc,desc").ApplyPagination(parameters).ToListAsync());
-            var errand = await _context.Errands.Where(x => x.Id == errandId).Select(x => new ErrandWithCommentsDto()
+            var comments = _mapper.Map<IList<Comment>>(await collection.ApplyOrderBy("createddateutc,desc").ApplyPagination(parameters).ToListAsync());
+            var errand = await _context.Errands.Where(x => x.Id == errandId).Select(x => new ErrandWithComments()
             {
                 AssignedToId = x.AssignedToId,
                 AssignedToName = x.AssignedToName,

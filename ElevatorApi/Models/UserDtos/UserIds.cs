@@ -1,6 +1,6 @@
-namespace ElevatorApi.Models.Users;
+namespace ElevatorApi.Models.UserDtos;
 
-public class UserIdDto
+public class UserIds
 {
     public string Id { get; set; } = null!;
     public string FirstName { get; set; } = null!;

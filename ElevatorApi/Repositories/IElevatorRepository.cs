@@ -2,7 +2,7 @@
 using ElevatorApi.Data.Entities;
 using ElevatorApi.Helpers;
 using ElevatorApi.Helpers.Extensions;
-using ElevatorApi.Models.Elevator;
+using ElevatorApi.Models.ElevatorDtos;
 using ElevatorApi.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,16 +10,16 @@ namespace ElevatorApi.Repositories;
 
 public interface IElevatorRepository
 {
-    public Task<(IEnumerable<ElevatorDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAll(
+    public Task<(IEnumerable<Elevator> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)> GetAll(
         ElevatorResourceParameters parameters);
 
-    public Task<ElevatorDto?> GetById(Guid elevatorId);
-    public Task<(IEnumerable<ElevatorIdDto>? Elevators, bool IsSuccess)> GetAllElevatorIds();
-    public Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)> GetById(
+    public Task<Elevator?> GetById(Guid elevatorId);
+    public Task<(IEnumerable<ElevatorIds>? Elevators, bool IsSuccess)> GetAllElevatorIds();
+    public Task<(ElevatorWithErrands? Elevator, PaginationMetadata PaginationMetadata)> GetById(
         Guid elevatorId, ElevatorWithErrandsResourceParameters parameters);
 
-    public Task<ElevatorDto?> CreateElevator(CreateElevatorDto model);
-    public Task<bool> UpdateElevator(Guid elevatorId, UpdateElevatorDto model);
+    public Task<Elevator?> CreateElevator(CreateElevatorRequest model);
+    public Task<bool> UpdateElevator(Guid elevatorId, UpdateElevatorRequest model);
 }
 
 public class ElevatorRepository : IElevatorRepository
@@ -34,7 +34,7 @@ public class ElevatorRepository : IElevatorRepository
         _mapper = mapper;
     }
 
-    public async Task<(IEnumerable<ElevatorDto> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)>
+    public async Task<(IEnumerable<Elevator> Elevators, PaginationMetadata PaginationMetadata, bool IsSuccess)>
         GetAll(ElevatorResourceParameters parameters)
     {
         try
@@ -50,7 +50,7 @@ public class ElevatorRepository : IElevatorRepository
             var totalItems = await collection.CountAsync();
             var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
-            var collectionToReturn = _mapper.Map<IEnumerable<ElevatorDto>>(
+            var collectionToReturn = _mapper.Map<IEnumerable<Elevator>>(
                 await collection.ApplyOrderBy(parameters.OrderBy).ApplyPagination(parameters).ToListAsync());
 
             return (collectionToReturn, paginationMetadata, true);
@@ -60,14 +60,14 @@ public class ElevatorRepository : IElevatorRepository
             // ignored
         }
 
-        return (Enumerable.Empty<ElevatorDto>(), null, false)!;
+        return (Enumerable.Empty<Elevator>(), null, false)!;
     }
 
-    public async Task<ElevatorDto?> GetById(Guid elevatorId)
+    public async Task<Elevator?> GetById(Guid elevatorId)
     {
         try
         {
-            return _mapper.Map<ElevatorDto>(await _context.Elevators.FindAsync(elevatorId));
+            return _mapper.Map<Elevator>(await _context.Elevators.FindAsync(elevatorId));
         }
         catch
         {
@@ -77,11 +77,11 @@ public class ElevatorRepository : IElevatorRepository
         return null!;
     }
 
-    public async Task<(IEnumerable<ElevatorIdDto>? Elevators, bool IsSuccess)> GetAllElevatorIds()
+    public async Task<(IEnumerable<ElevatorIds>? Elevators, bool IsSuccess)> GetAllElevatorIds()
     {
         try
         {
-            return (await _context.Elevators.OrderBy(x => x.Location).Select(x => new ElevatorIdDto()
+            return (await _context.Elevators.OrderBy(x => x.Location).Select(x => new ElevatorIds()
             {
                 Id = x.Id,
                 Location = x.Location,
@@ -95,7 +95,7 @@ public class ElevatorRepository : IElevatorRepository
         return (null, false);
     }
 
-    public async Task<(ElevatorWithErrandsDto? Elevator, PaginationMetadata PaginationMetadata)>
+    public async Task<(ElevatorWithErrands? Elevator, PaginationMetadata PaginationMetadata)>
         GetById(Guid elevatorId,
             ElevatorWithErrandsResourceParameters parameters)
     {
@@ -124,7 +124,7 @@ public class ElevatorRepository : IElevatorRepository
             var paginationMetadata = new PaginationMetadata(parameters, totalItems);
 
 
-            return (_mapper.Map<ElevatorWithErrandsDto>(elevator), paginationMetadata);
+            return (_mapper.Map<ElevatorWithErrands>(elevator), paginationMetadata);
         }
         catch
         {
@@ -134,14 +134,14 @@ public class ElevatorRepository : IElevatorRepository
         return (null, null)!;
     }
 
-    public async Task<ElevatorDto?> CreateElevator(CreateElevatorDto model)
+    public async Task<Elevator?> CreateElevator(CreateElevatorRequest model)
     {
         try
         {
             var elevator = _mapper.Map<ElevatorEntity>(model);
             await _context.Elevators.AddAsync(elevator);
             await _context.SaveChangesAsync();
-            return _mapper.Map<ElevatorDto>(elevator);
+            return _mapper.Map<Elevator>(elevator);
         }
         catch
         {
@@ -151,7 +151,7 @@ public class ElevatorRepository : IElevatorRepository
         return null!;
     }
 
-    public async Task<bool> UpdateElevator(Guid elevatorId, UpdateElevatorDto model)
+    public async Task<bool> UpdateElevator(Guid elevatorId, UpdateElevatorRequest model)
     {
         try
         {
