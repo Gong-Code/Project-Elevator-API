@@ -4,6 +4,7 @@ using ElevatorApi.Models.CommentDtos;
 using ElevatorApi.Models.DeviceDtos;
 using ElevatorApi.Models.ElevatorDtos;
 using ElevatorApi.Models.ErrandDtos;
+using ElevatorApi.Models.UserDtos;
 
 namespace ElevatorApi.Helpers.Profiles
 {
@@ -28,6 +29,11 @@ namespace ElevatorApi.Helpers.Profiles
 
             CreateMap<Comment, CommentEntity>().ForMember(x => x.Id, y => y.MapFrom(x => x.CommentId)).ReverseMap();
             CreateMap<CreateCommentRequest, CommentEntity>();
+
+
+            //CreateMap<User, UserEntity>().ForMember(x => x.Role, y => y.MapFrom(x => x.Role.GetRoleAsEnum()));
+            //CreateMap<UserEntity, User>().ForMember(x => x.Role, y => y.MapFrom(x => x.Role.GetRoleAsString()));
+            //CreateMap<UserEntity, User>().ReverseMap();
 
 
 
