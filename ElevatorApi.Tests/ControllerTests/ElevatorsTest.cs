@@ -1,6 +1,5 @@
 ﻿using ElevatorApi.Controllers;
 using ElevatorApi.Data;
-using ElevatorApi.Models.Elevator;
 using ElevatorApi.ResourceParameters;
 
 namespace ElevatorApi.Tests.ControllerTests
