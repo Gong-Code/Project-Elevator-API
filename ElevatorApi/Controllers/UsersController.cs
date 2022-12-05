@@ -1,39 +1,68 @@
 ﻿using ElevatorApi.Helpers;
 using ElevatorApi.Models.UserDtos;
 using ElevatorApi.Repositories;
+using ElevatorApi.ResourceParameters;
+using ElevatorApi.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ElevatorApi.Controllers
+namespace ElevatorApi.Controllers;
+
+[Route("api/users")]
+[ApiController]
+public class UsersController : ControllerBase
 {
-    [Route("api/users")]
-    [ApiController]
-    public class UsersController : ControllerBase
+    private readonly IUserRepository _userRepository;
+    private readonly IPropertyService _propertyService;
+    
+
+    public UsersController(IUserRepository userRepository, IPropertyService propertyService)
     {
-        private readonly IUserRepository _userRepository;
+        _userRepository = userRepository;
+        _propertyService = propertyService;
+        
 
-        public UsersController(IUserRepository userRepository)
+    }
+
+
+    [HttpGet]
+    [Route("ids")]
+    public async Task<IActionResult> GetAllUserIds(string role = "admin")
+    {
+        try
         {
-            _userRepository = userRepository;
+            var (users, isSuccess) = await _userRepository.GetAllUserIdsAsync(role);
+
+            if (!isSuccess)
+                throw new Exception();
+
+            return Ok(new HttpResponse<IEnumerable<UserIds>>(users ?? new List<UserIds>()));
         }
-
-
-        [HttpGet]
-        [Route("ids")]
-        public async Task<IActionResult> GetAllUser(string role = "admin")
+        catch
         {
-            try
-            {
-                var (users, isSuccess) = await _userRepository.GetAllUserIdsAsync(role);
-
-                if (!isSuccess)
-                    throw new Exception();
-
-                return Ok(new HttpResponse<IEnumerable<UserIds>>(users ?? new List<UserIds>()));
-            }
-            catch
-            {
-                return StatusCode(500);
-            }
+            return StatusCode(500);
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers([FromQuery] UserResourceParameters parameters)
+    {
+        try
+        {      
+            var (users, paginationMetadata, isSuccess) = await
+                _userRepository.GetAllAsync(parameters);
+
+            if (!isSuccess)
+                throw new Exception();
+
+            return Ok(new PaginatedHttpResponse<IEnumerable<User>>(users, paginationMetadata));
+        }
+        catch
+        {
+            return StatusCode(500);
+        }
+    }
+
 }
+
+

@@ -9,6 +9,7 @@ public interface IUserService
     public Task<string> GetNameForId(string id);
     public Task<(Guid UserId, string UserName)> GetUserData();
     public Task<bool> CheckIfUserExists(string userId);
+   
 }
 
 public class IdentityUserService : IUserService
@@ -81,5 +82,10 @@ public class IdentityUserService : IUserService
         }
 
         return exists;
+    }
+
+    public Task<Guid> GetById(Guid id)
+    {
+        throw new NotImplementedException();
     }
 }
