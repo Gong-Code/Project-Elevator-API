@@ -44,7 +44,6 @@ public class UserRepository : IUserRepository
 
             var paginationMetadata = new PaginationMetadata(parameters, await _context.Users.CountAsync());
 
-
             return (users, paginationMetadata,true);
         }
         catch (Exception e)

@@ -63,19 +63,6 @@ public class UsersController : ControllerBase
         }
     }
 
-    //[HttpPost]
-    //public async Task<IActionResult> CreateUser([FromBody]CreateUserRequest model )
-    //{
-    //    try
-    //    {
-
-    //    }
-    //    catch (Exception e)
-    //    {
-    //        Console.WriteLine(e);
-    //        throw;
-    //    }
-    //}
 }
 
 
