@@ -4,29 +4,27 @@ namespace ElevatorApi.Services
 {
     public interface IStatisticService
     {
-        IEnumerable<Statistic> GetStatistics();
-        Statistic GetStatistic(int id);
+        IEnumerable<int> GetStatistics();
+        int GetStatistic(int id);
     }
 
     public class StatisticService : IStatisticService
     {
-        private readonly List<Statistic> _demoData = new List<Statistic>
+        private readonly List<int> _demoData = new List<int>
         {
-            new Statistic
-            {
-                Id = 1,
-                Repaired = 14,
-                Installed = 6
-            }
+            12123,
+            12411,
+            23311,
+            32342
         };
 
 
-        public Statistic GetStatistic(int id)
+        public int GetStatistic(int id)
         {
             return _demoData[id];
         }
 
-        public IEnumerable<Statistic> GetStatistics()
+        public IEnumerable<int> GetStatistics()
         {
             return _demoData;
         }
