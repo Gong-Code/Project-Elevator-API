@@ -1,5 +1,6 @@
 ﻿using ElevatorApi.Data.Entities;
 using ElevatorApi.Models.StatisticDtos;
+using ElevatorApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ElevatorApi.Controllers
@@ -8,17 +9,24 @@ namespace ElevatorApi.Controllers
     [ApiController]
     public class StatisticController : ControllerBase
     {
+        private readonly IStatisticService _statistic;
+
+        public StatisticController(IStatisticService statistic)
+        {
+            _statistic = statistic;
+        }
+
         [HttpGet]
         public IActionResult GetStatistics()
         {
-            var statistics = StatisticEntity.CurrentStatistic;
+            var statistics = _statistic.GetStatistics();
 
-            if (statistics == null)
+            if (statistics != null)
             {
-                return NotFound();
+                return Ok(statistics);
             }
 
-            return Ok(statistics);
+            return BadRequest();
         }
 
         [HttpGet("{statisticId}")]
