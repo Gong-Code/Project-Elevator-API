@@ -24,6 +24,7 @@ builder.Services.AddScoped<IElevatorRepository, ElevatorRepository>();
 builder.Services.AddScoped<IErrandsRepository, ErrandsRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
+builder.Services.AddScoped<IStatisticService, StatisticService>();
 
 
 builder.Services.AddDbContext<SqlDbContext>(options =>

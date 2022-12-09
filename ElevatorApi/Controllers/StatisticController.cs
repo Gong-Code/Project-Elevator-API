@@ -32,7 +32,7 @@ namespace ElevatorApi.Controllers
         [HttpGet("{statisticId}")]
         public ActionResult<Statistic> GetStatisticById(int statisticId)
         {
-            var statistic = StatisticEntity.CurrentStatistic.Statistics.FirstOrDefault(f => f.Id == statisticId);
+            var statistic = _statistic.GetStatistic(statisticId);
 
             if (statistic == null)
             {
